@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "747223145666",
+    "firebase_url": "https://omca2p-88fad-default-rtdb.firebaseio.com",
+    "project_id": "omca2p-88fad",
+    "storage_bucket": "omca2p-88fad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747223145666:android:e8c8b72da7d5b3178faf5b",
+        "android_client_info": {
+          "package_name": "com.davinci.etone.omc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "747223145666-hpak7sviq9le77mrt1ibf7c4njhe91or.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOXpKVbRxkxjSIzydFW3mmgbkZPspX-dY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "747223145666-hpak7sviq9le77mrt1ibf7c4njhe91or.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

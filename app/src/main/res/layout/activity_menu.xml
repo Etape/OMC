@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activity_menu">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="44dp"
+            android:layout_height="41dp"
+            android:clickable="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="11dp"
+            app:srcCompat="@drawable/ic_arrow_back_black_24dp" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="Parametres"
+            android:textColor="@color/colorAccent"
+            android:textAlignment="center"
+            android:textSize="30sp" />
+
+    </RelativeLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_marginTop="60dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/addevent"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Ajouter un Evenement"
+            android:padding="5dp"
+            android:textSize="18dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/aclonica"
+            android:gravity="center_vertical"
+            android:elevation="2dp"
+            android:drawableRight="@drawable/ic_keyboard_arrow_right_black_24dp"/>
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/more_events"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="5dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/add_info"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:text="Ajouter une Info"
+                android:textSize="14dp"
+                android:clickable="true"
+                android:fontFamily="@font/aclonica"
+                />
+            <TextView
+                android:id="@+id/add_action"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:text="Ajouter une Action"
+                android:textSize="14dp"
+                android:clickable="true"
+                android:fontFamily="@font/aclonica"
+                />
+            <TextView
+                android:id="@+id/add_event"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:text="Ajouter un Evenement"
+                android:textSize="14dp"
+                android:clickable="true"
+                android:fontFamily="@font/aclonica"
+                />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey"/>
+        <TextView
+            android:id="@+id/compte"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Compte"
+            android:textColor="@color/black"
+            android:padding="5dp"
+            android:textSize="18dp"
+            android:fontFamily="@font/aclonica"
+            android:gravity="center_vertical"
+            android:elevation="3dp"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey"/>
+        <TextView
+            android:id="@+id/preferences"
+            android:clickable="true"
+            android:textColor="@color/black"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Preferences"
+            android:padding="5dp"
+            android:textSize="18dp"
+            android:fontFamily="@font/aclonica"
+            android:gravity="center_vertical"
+            android:elevation="2dp"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey"/>
+        <TextView
+            android:id="@+id/aide"
+            android:textColor="@color/black"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Aide"
+            android:padding="5dp"
+            android:textSize="18dp"
+            android:fontFamily="@font/aclonica"
+            android:gravity="center_vertical"
+            android:elevation="2dp"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey"/>
+        <TextView
+            android:id="@+id/apropos"
+            android:clickable="true"
+            android:textColor="@color/black"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="A propos"
+            android:padding="5dp"
+            android:textSize="18dp"
+            android:fontFamily="@font/aclonica"
+            android:gravity="center_vertical"
+            android:elevation="2dp"
+            android:drawableRight="@drawable/ic_keyboard_arrow_right_black_24dp"/>
+
+        <TextView
+            android:id="@+id/version_text"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=" AppBuild : OMC2022-v2.2312 \n Version : 1.1.11 \n Update : 20 Sept. 2022 at 01:13 ( +1 GMT)\n"
+            android:textSize="13dp"
+            android:clickable="true"
+            android:fontFamily="@font/aclonica"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey"/>
+    </LinearLayout>
+
+</RelativeLayout>

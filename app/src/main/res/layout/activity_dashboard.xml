@@ -1,0 +1,1785 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorAccent"
+    tools:context=".Activity_dashboard">
+
+    <ProgressBar
+        android:id="@+id/progressBarLoading"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="182dp"
+        android:layout_height="179dp"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/baner"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/menu"
+            android:layout_width="44dp"
+            android:layout_height="41dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="11dp"
+            app:srcCompat="@drawable/ic_menu_black_24dp" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:fontFamily="@font/aclonica"
+            android:text="OMC"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/round_letter"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="18dp"
+            android:background="@drawable/round_letter"
+            android:fontFamily="@font/aclonica"
+            android:text="J"
+            android:textAlignment="center"
+            android:textColor="@color/bleu"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/dashboard"
+        android:layout_width="match_parent"
+        android:layout_height="1350px"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:visibility="visible">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignTop="@+id/dashboard"
+            android:layout_marginStart="0dp"
+            tools:ignore="NotSibling">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/see_history"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:clickable="true"
+                        android:fontFamily="@font/aclonica"
+                        android:text="A la Une                                    voir tout"
+                        android:textColor="@color/black"
+                        android:textSize="16dp" />
+
+                    <android.support.v7.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <com.smarteist.autoimageslider.SliderView
+                            android:id="@+id/imageSlider"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:sliderAnimationDuration="600"
+                            app:sliderAutoCycleDirection="right"
+                            app:sliderAutoCycleEnabled="true"
+                            app:sliderIndicatorAnimationDuration="600"
+                            app:sliderIndicatorGravity="center_horizontal|bottom"
+                            app:sliderIndicatorMargin="15dp"
+                            app:sliderIndicatorOrientation="horizontal"
+                            app:sliderIndicatorPadding="3dp"
+                            app:sliderIndicatorRadius="2dp"
+                            app:sliderIndicatorSelectedColor="@color/colorPrimaryDark"
+                            app:sliderIndicatorUnselectedColor="@color/grey"
+                            app:sliderScrollTimeInSec="1"
+                            app:sliderStartAutoCycle="true" />
+                    </android.support.v7.widget.CardView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="180dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/dashboard_stat1"
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:background="@drawable/round_announce"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="..."
+                            android:textAlignment="center"
+                            android:textColor="@color/bleu"
+                            android:textSize="30sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentStart="true"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="Commune la plus active du mois"
+                            android:textSize="14sp"
+                            android:textStyle="bold|italic" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="180dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/dashboard_stat2"
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:background="@drawable/round_announce_yellow"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="..."
+                            android:textAlignment="center"
+                            android:textSize="30sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentStart="true"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="Couverture des BV \n"
+                            android:textSize="14sp"
+                            android:textStyle="bold|italic" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="180dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/dashboard_stat3"
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:background="@drawable/round_announce"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="..."
+                            android:textAlignment="center"
+                            android:textColor="@color/bleu"
+                            android:textSize="30sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentStart="true"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="Nombre de Preinscription du jour"
+                            android:textSize="14sp"
+                            android:textStyle="bold|italic" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="180dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/dashboard_stat4"
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:background="@drawable/round_announce_yellow"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="..."
+                            android:textAlignment="center"
+                            android:textSize="30sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentStart="true"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="Nombres d'inscription du jour"
+                            android:textSize="14sp"
+                            android:textStyle="bold|italic" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="180dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/dashboard_stat5"
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:background="@drawable/round_announce"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="..."
+                            android:textAlignment="center"
+                            android:textColor="@color/bleu"
+                            android:textSize="30sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentStart="true"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="Les 18, 19 ans \n"
+                            android:textSize="14sp"
+                            android:textStyle="bold|italic" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="180dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/dashboard_stat6"
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:background="@drawable/round_announce_yellow"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="..."
+                            android:textAlignment="center"
+                            android:textSize="30sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentStart="true"
+                            android:fontFamily="@font/aclonica"
+                            android:gravity="center"
+                            android:text="La Diaspora \n"
+                            android:textSize="14sp"
+                            android:textStyle="bold|italic" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/dashboard_rh"
+        android:layout_width="match_parent"
+        android:layout_height="1350px"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignTop="@+id/dashboard_rh"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            tools:ignore="NotSibling">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/research_rh"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/back_rh"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/ic_arrow_back_green_24dp"/>
+
+                    <AutoCompleteTextView
+                        android:id="@+id/research_bar_rh"
+                        android:layout_width="220dp"
+                        android:layout_height="35dp"
+                        android:focusedByDefault="false"
+                        android:background="@drawable/editext_radius"
+                        android:paddingLeft="10dp"
+                        android:textCursorDrawable="@null"
+                        android:hint="Recherche des militants" />
+
+                    <ImageView
+                        android:id="@+id/but_search_rh"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="5dp"
+                        android:clickable="true"
+                        app:srcCompat="@drawable/ic_search_black_24dp" />
+
+                    <ImageView
+                        android:id="@+id/but_filter_rh"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="5dp"
+                        android:clickable="true"
+                        app:srcCompat="@drawable/ic_filter_black_24dp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@color/grey" />
+
+                <LinearLayout
+                    android:id="@+id/results_container_rh"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:id="@+id/search_rh_progressBar"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_horizontal"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/no_results_rh"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="100dp"
+                        android:fontFamily="@font/aclonica"
+                        android:text="Aucun resultat trouve pour cette recherche"
+                        android:textAlignment="center"
+                        android:textSize="18dp"
+                        android:visibility="gone" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recyclerviewMil"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone">
+
+                    </android.support.v7.widget.RecyclerView>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/dashboard_rh_contain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_rh_stat1"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textColor="@color/bleu"
+                                android:textSize="30sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Commune la plus active du mois"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_rh_stat2"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce_yellow"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textSize="30sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Militant le plus actif \n"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_rh_stat3"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textColor="@color/bleu"
+                                android:textSize="30sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Militant le plus actif du jour"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_rh_stat4"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce_yellow"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textSize="34sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Militant actifs du jour"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/dashboard_occupancy"
+        android:layout_width="match_parent"
+        android:layout_height="1350px"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true">
+        <ImageView
+            android:id="@+id/add_bv"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:translationZ="2dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="30dp"
+            android:clickable="true"
+            app:srcCompat="@drawable/ic_add_circle_white_green"
+            />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignTop="@+id/dashboard_occupancy"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            tools:ignore="NotSibling">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/research_occupancy"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/back_occupancy"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/ic_arrow_back_green_24dp"/>
+                    <AutoCompleteTextView
+                        android:id="@+id/research_bar_occupancy"
+                        android:layout_width="220dp"
+                        android:layout_height="35dp"
+                        android:textCursorDrawable="@null"
+                        android:background="@drawable/editext_radius"
+                        android:paddingLeft="10dp"
+                        android:hint="Recherche dans le territoire" />
+
+                    <ImageView
+                        android:id="@+id/but_search_occupancy"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="5dp"
+                        android:clickable="true"
+                        app:srcCompat="@drawable/ic_search_black_24dp" />
+
+                    <ImageView
+                        android:id="@+id/but_filter_occupancy"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="5dp"
+                        android:clickable="true"
+                        app:srcCompat="@drawable/ic_filter_black_24dp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@color/grey" />
+                <LinearLayout
+                    android:id="@+id/results_container_occupancy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                    <ProgressBar
+                        android:id="@+id/search_occupancy_progressBar"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:visibility="gone"
+                        android:layout_gravity="center_horizontal"/>
+                    <TextView
+                        android:id="@+id/no_results_occupancy"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:visibility="gone"
+                        android:text="Aucun resultat trouve pour cette recherche"
+                        android:textAlignment="center"
+                        android:fontFamily="@font/aclonica"
+                        android:textSize="18dp"
+                        />
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:id="@+id/recyclerviewBv"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:id="@+id/recyclerviewDep"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:id="@+id/recyclerviewCom"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:id="@+id/recyclerviewReg"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/dashboard_occupancy_contain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_occupancy_stat1"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textColor="@color/bleu"
+                                android:textSize="30sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Commune la plus active du mois"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_occupancy_stat2"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce_yellow"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textSize="34sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Couverture des BV"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_occupancy_stat3"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textColor="@color/bleu"
+                                android:textSize="30sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Communes actives du jour"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_occupancy_stat4"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce_yellow"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textSize="34sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Communes non actives du mois "
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/dashboard_tchat"
+        android:layout_width="match_parent"
+        android:layout_height="1350px"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/add_tchat"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="30dp"
+            android:layout_marginEnd="30dp"
+            android:clickable="true"
+            android:translationZ="2dp"
+            app:srcCompat="@drawable/ic_add_circle_white_green" />
+
+        <LinearLayout
+            android:id="@+id/new_disc_box"
+            android:layout_width="320dp"
+            android:layout_height="250dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/border_rect_bleu"
+            android:orientation="vertical"
+            android:translationZ="1dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border_rect_gris_2"
+                android:fontFamily="@font/aclonica"
+                android:gravity="center"
+                android:padding="5dp"
+                android:text="Nouvelle discussion"
+                android:textColor="@color/colorAccent" />
+
+            <EditText
+                android:id="@+id/disc_title"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/editext_radius_white"
+                android:hint="Titre de la discussion"
+                android:maxLength="30"
+                android:padding="7dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:fontFamily="@font/aclonica"
+                android:text="Type"
+                android:textColor="@color/colorAccent" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radio_private"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:text="Privee"
+                    android:textColor="@color/colorAccent" />
+
+                <RadioButton
+                    android:id="@+id/radio_sms"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:text="SMS"
+                    android:textColor="@color/colorAccent" />
+
+                <RadioButton
+                    android:id="@+id/radio_forum"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:text="Forum"
+                    android:textColor="@color/colorAccent" />
+            </RadioGroup>
+
+            <AutoCompleteTextView
+                android:id="@+id/disc_destinataire"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/editext_radius_white"
+                android:hint="Destinataire"
+                android:padding="7dp" />
+
+            <Button
+                android:id="@+id/but_create_disc"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/button_radius"
+                android:fontFamily="@font/aclonica"
+                android:text="creer"
+                android:textColor="@color/colorAccent" />
+
+            <ProgressBar
+                android:id="@+id/progressBar_create_disc"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center_horizontal"
+                android:indeterminateTint="@color/colorAccent"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignTop="@+id/dashboard_tchat"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            tools:ignore="NotSibling">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/aclonica"
+                    android:gravity="center"
+                    android:text="Messagerie"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textStyle="bold" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/private_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/aclonica"
+                    android:gravity="center"
+                    android:text="Forums"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textStyle="bold" />
+
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/forum_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/aclonica"
+                    android:gravity="center"
+                    android:text="SMS"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textStyle="bold" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/sms_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/dashboard_ins"
+        android:layout_width="match_parent"
+        android:layout_height="1350px"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true">
+        <ImageView
+            android:id="@+id/add_registration"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="30dp"
+            android:translationZ="2dp"
+            android:layout_marginBottom="30dp"
+            android:clickable="true"
+            app:srcCompat="@drawable/ic_add_circle_white_green"
+            />
+
+        <LinearLayout
+            android:id="@+id/select_registration"
+            android:layout_width="200dp"
+            android:visibility="gone"
+            android:layout_height="100dp"
+            android:background="@drawable/border_rect_blanc"
+            android:translationZ="2dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="80dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/close_selection"
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                app:srcCompat="@drawable/ic_arrow_back_green_24dp"
+                />
+            <LinearLayout
+                android:layout_width="85dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_gravity="center">
+
+                <ImageView
+                    android:id="@+id/add_pre"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:clickable="true"
+                    app:srcCompat="@drawable/ic_note_add_black_24dp"
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Preinscription"
+                    android:textAlignment="center"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/aclonica"
+                    android:textSize="10dp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="85dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_gravity="center">
+
+                <ImageView
+                    android:id="@+id/add_ins"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:clickable="true"
+                    app:srcCompat="@drawable/ic_note_add_pink_24dp"
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Inscription"
+                    android:textAlignment="center"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/aclonica"
+                    android:textSize="10dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignTop="@+id/dashboard_ins"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            tools:ignore="NotSibling">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+
+                <LinearLayout
+                    android:id="@+id/research_ins"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/back_ins"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/ic_arrow_back_green_24dp"/>
+                    <AutoCompleteTextView
+                        android:id="@+id/research_bar_ins"
+                        android:layout_width="220dp"
+                        android:layout_height="35dp"
+                        android:textCursorDrawable="@null"
+                        android:background="@drawable/editext_radius"
+                        android:paddingLeft="10dp"
+                        android:hint="Dans Enregistrements" />
+
+                    <ImageView
+                        android:id="@+id/but_search_ins"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="5dp"
+                        android:clickable="true"
+                        app:srcCompat="@drawable/ic_search_black_24dp" />
+
+                    <ImageView
+                        android:id="@+id/but_filter_ins"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="5dp"
+                        android:clickable="true"
+                        app:srcCompat="@drawable/ic_filter_black_24dp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@color/grey" />
+                <LinearLayout
+                    android:id="@+id/results_container_ins"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                    <ProgressBar
+                        android:id="@+id/search_ins_progressBar"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:visibility="gone"
+                        android:layout_gravity="center_horizontal"/>
+                    <TextView
+                        android:id="@+id/no_results_ins"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:visibility="gone"
+                        android:text="Aucun resultat trouve pour cette recherche"
+                        android:textAlignment="center"
+                        android:fontFamily="@font/aclonica"
+                        android:textSize="18dp"
+                        />
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:id="@+id/recyclerviewIns"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:id="@+id/recyclerviewPre"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/dashboard_ins_contain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_ins_stat1"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="WOURI 3"
+                                android:textAlignment="center"
+                                android:textColor="@color/bleu"
+                                android:textSize="30sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Preinscriptions du mois"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_ins_stat2"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce_yellow"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="305/ 512"
+                                android:textAlignment="center"
+                                android:textSize="34sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Preinscriptions du jour"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_ins_stat3"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textColor="@color/bleu"
+                                android:textSize="30sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="Les 18,19 ans"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="180dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/dashboard_ins_stat4"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_alignParentTop="true"
+                                android:background="@drawable/round_announce_yellow"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="..."
+                                android:textAlignment="center"
+                                android:textSize="34sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:fontFamily="@font/aclonica"
+                                android:gravity="center"
+                                android:text="La Diaspora"
+                                android:textSize="14sp"
+                                android:textStyle="bold|italic" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/bottomMenu"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:background="@color/colorAccent"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/but_home"
+            android:layout_width="72dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorAccent"
+            android:clickable="true"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_home_green_24dp" />
+
+        <ImageView
+            android:id="@+id/but_group"
+            android:layout_width="72dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/but_occupancy"
+            android:background="@drawable/butt_raduis_up_left"
+            android:clickable="true"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_group_white_24dp" />
+
+        <ImageView
+            android:id="@+id/but_occupancy"
+            android:layout_width="72dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/but_tchat"
+            android:background="@color/colorPrimaryDark"
+            android:clickable="true"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_occupancy_white_24dp" />
+
+        <ImageView
+            android:id="@+id/but_tchat"
+            android:layout_width="72dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/but_addIns"
+            android:background="@color/colorPrimaryDark"
+            android:clickable="true"
+            android:padding="12dp"
+            app:srcCompat="@drawable/ic_textsms_white_24dp" />
+
+        <ImageView
+            android:id="@+id/but_addIns"
+            android:layout_width="72dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorPrimaryDark"
+            android:clickable="true"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_note_add_white_24dp" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/filter_menu"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="5dp"
+        android:background="@drawable/border_rect_blanc"
+        android:orientation="vertical"
+        android:padding="5dp"
+        android:visibility="gone">
+
+        <View
+            android:id="@+id/hide_filter"
+            android:layout_width="100dp"
+            android:layout_height="10dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_radius"
+            android:clickable="true" />
+
+        <TextView
+            android:id="@+id/label_select_where"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/hide_filter"
+            android:fontFamily="@font/aclonica"
+            android:text="Rechercher dans" />
+
+        <RadioGroup
+            android:id="@+id/filter_select_where"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_below="@+id/label_select_where"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radio_militant"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:checked="true"
+                android:fontFamily="@font/aclonica"
+                android:text="Militants" />
+            <RadioButton
+                android:id="@+id/radio_Dec"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="DEC" />
+            <RadioButton
+                android:id="@+id/radio_Dep"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="DEP" />
+            <RadioButton
+                android:id="@+id/radio_Der"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="DER" />
+
+            <RadioButton
+                android:id="@+id/radio_BV"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="BV" />
+
+            <RadioButton
+                android:id="@+id/radio_commune"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="Com."
+                android:visibility="gone" />
+
+            <RadioButton
+                android:id="@+id/radio_dep"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="Dept."
+                android:visibility="gone" />
+
+            <RadioButton
+                android:id="@+id/radio_reg"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="Reg."
+                android:visibility="gone" />
+
+            <RadioButton
+                android:id="@+id/radio_pays"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="Pays"
+                android:visibility="gone" />
+
+            <RadioButton
+                android:id="@+id/radio_pre"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="Preinsc." />
+
+            <RadioButton
+                android:id="@+id/radio_insc"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/aclonica"
+                android:text="Inscrip." />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/label_select_zone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/aclonica"
+            android:text="Emplacement" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginVertical="10dp"
+            android:orientation="horizontal">
+
+            <AutoCompleteTextView
+                android:id="@+id/search_region"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/editext_radius_white"
+                android:ems="5"
+                android:hint="Region"
+                android:paddingLeft="5dp" />
+
+            <AutoCompleteTextView
+                android:id="@+id/search_dep"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginHorizontal="5dp"
+                android:background="@drawable/editext_radius_white"
+                android:ems="5"
+                android:hint="Depart."
+                android:paddingLeft="5dp" />
+
+            <AutoCompleteTextView
+                android:id="@+id/search_com"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginHorizontal="5dp"
+                android:background="@drawable/editext_radius_white"
+                android:ems="5"
+                android:hint="Commune"
+                android:paddingLeft="5dp" />
+        </LinearLayout>
+
+        <AutoCompleteTextView
+            android:id="@+id/search_pays"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/editext_radius_white"
+            android:ems="10"
+            android:hint="Pays"
+            android:paddingLeft="5dp" />
+
+        <TextView
+            android:id="@+id/label_select_period"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/aclonica"
+            android:text="Periode d'enregistrement" />
+
+        <LinearLayout
+            android:id="@+id/layout_period"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="@font/aclonica"
+                android:text="Du" />
+
+            <EditText
+                android:id="@+id/search_startDate"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:layout_marginHorizontal="5dp"
+                android:background="@drawable/editext_radius_white"
+                android:ems="6"
+                android:hint="Debut"
+                android:inputType="date"
+                android:paddingLeft="5dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="@font/aclonica"
+                android:text="au" />
+
+            <EditText
+                android:id="@+id/search_endDate"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:layout_marginHorizontal="5dp"
+                android:background="@drawable/editext_radius_white"
+                android:ems="6"
+                android:hint="Debut"
+                android:inputType="date"
+                android:paddingLeft="5dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/label_select_human"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/aclonica"
+            android:text="Filtre Humain" />
+
+        <LinearLayout
+            android:id="@+id/human_filter"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/search_age"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/editext_radius_white"
+                android:ems="4"
+                android:hint="Age min"
+                android:inputType="number"
+                android:paddingLeft="5dp" />
+
+            <EditText
+                android:id="@+id/search_endAge"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/editext_radius_white"
+                android:ems="4"
+                android:hint="Age max"
+                android:inputType="number"
+                android:paddingLeft="5dp" />
+
+            <AutoCompleteTextView
+                android:id="@+id/search_sexe"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:layout_marginHorizontal="10dp"
+                android:background="@drawable/editext_radius_white"
+                android:ems="6"
+                android:hint="Sexe"
+                android:inputType="text"
+                android:paddingLeft="5dp" />
+
+        </LinearLayout>
+
+        <AutoCompleteTextView
+            android:id="@+id/search_origine"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/editext_radius_white"
+            android:ems="8"
+            android:hint="Departement d'origine"
+            android:inputType="text"
+            android:paddingLeft="5dp" />
+
+        <Button
+            android:id="@+id/search_valider"
+            android:layout_width="150dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginVertical="15dp"
+            android:background="@drawable/button_radius"
+            android:text="Valider"
+            android:textColor="@color/colorAccent" />
+    </LinearLayout>
+</RelativeLayout>

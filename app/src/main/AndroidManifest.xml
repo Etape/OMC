@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.davinci.etone.omc">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:appComponentFactory="androidx"
+        android:icon="@drawable/logo_omc2_50"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/logo_omc2_50"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:replace="android:appComponentFactory">
+        <activity android:name=".Activity_launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Activity_login" />
+        <activity android:name=".Activity_dashboard" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
+        <activity android:name=".Activity_createAccount" />
+        <activity android:name=".Activity_personnel" />
+        <activity android:name=".Activity_bv" />
+
+        <service
+            android:name=".Service_AddPreinscription"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".Service_AddBv"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".Service_AddInscription"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".Service_SendSms"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name=".Activity_tchat" />
+        <activity android:name=".Activity_add_preinscription" />
+        <activity android:name=".Activity_add_inscription" />
+        <activity android:name=".Activity_menu" />
+        <activity android:name=".Activity_Add_info" />
+
+        <service
+            android:name=".Service_PatriotNotifications"
+            android:exported="false" />
+
+        <activity android:name=".Activity_uploading"></activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/main"
+    android:background="@drawable/discussion_wallpaper4"
+    tools:context=".Activity_tchat">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="44dp"
+            android:layout_height="41dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="11dp"
+            android:clickable="true"
+            app:srcCompat="@drawable/ic_arrow_back_black_24dp" />
+
+        <TextView
+            android:id="@+id/disc_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="Titre Zone"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/initials"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="68dp"
+            android:background="@drawable/round_letter"
+            android:fontFamily="@font/aclonica"
+            android:gravity="center"
+            android:text="TZ"
+            android:textAlignment="center"
+            android:textColor="@color/bleu"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+        <ImageView
+            android:id="@+id/tchat_menu"
+            android:layout_width="35dp"
+            android:clickable="true"
+            android:layout_height="35dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="18dp"
+            app:srcCompat="@drawable/ic_points_vert_black_24dp"
+            />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/text_mois"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="65dp"
+        android:background="@drawable/border_rect_bleu"
+        android:padding="5dp"
+        android:text="mois-annee"
+        android:textColor="@color/colorAccent"
+        android:textSize="13dp"
+        android:textStyle="bold"
+        android:translationZ="1dp"
+        android:visibility="visible" />
+
+    <ScrollView
+        android:id="@+id/messages_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="450dp"
+        android:layout_marginTop="60dp"
+        android:paddingTop="10dp"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/messages_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible">
+
+            </android.support.v7.widget.RecyclerView>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <ScrollView
+        android:id="@+id/scroll_settings"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="60dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="5dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Destinataires"
+                android:textColor="@color/colorAccent"
+                android:fontFamily="@font/aclonica"
+                android:layout_gravity="center_horizontal"/>
+            <MultiAutoCompleteTextView
+                android:id="@+id/destinataires"
+                android:layout_width="300dp"
+                android:layout_height="100dp"
+                android:padding="7dp"
+                android:hint="destinataires"
+                android:background="@drawable/editext_radius_white"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Entete"
+                android:textColor="@color/colorAccent"
+                android:fontFamily="@font/aclonica"
+                android:layout_gravity="center_horizontal"/>
+            <EditText
+                android:id="@+id/entete"
+                android:layout_width="300dp"
+                android:layout_height="100dp"
+                android:background="@drawable/editext_radius_white"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:textSize="14dp"
+                android:text=" **** OMC INFORMATION IMPORTANTE ***** \n Cher XXXX,"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bas du message"
+                android:textColor="@color/colorAccent"
+                android:fontFamily="@font/aclonica"
+                android:layout_gravity="center_horizontal"/>
+            <EditText
+                android:id="@+id/bas_message"
+                android:layout_width="300dp"
+                android:layout_height="120dp"
+                android:textSize="14dp"
+                android:padding="7dp"
+                android:text="En cas de soucis veuillez nous contacter au 679362411 ou 692304618 par Whatsaap ou par SMS.\nMouvement Onze millions de Citoyens, Commission de la Communication"
+                android:background="@drawable/editext_radius_white"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="5dp"/>
+            <Button
+                android:id="@+id/ok_button"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/button_radius"
+                android:text="Ok"
+                android:textColor="@color/colorAccent"
+                android:fontFamily="@font/aclonica"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <ScrollView
+        android:id="@+id/messages_validation_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:paddingTop="30dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp"
+            android:paddingTop="10dp">
+
+            <TextView
+                android:id="@+id/message_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border_rect_bleu"
+                android:padding="5dp"
+                android:text="**** OMC INFORMATION IMPORTANTE *****
+Cher XXXX,
+
+Nous tenons à vous informer de la disponibilité de votre carte d'electeur aupres de votre antenne ELECAM la plus proche.
+Nos agents vous contacterons ulterieurement pour vous assister dans la procedure de recuperation de celle-ci.
+
+En cas de soucis veuillez nous contacter au 679362411 ou 692304618 par Whatsaap ou par SMS.
+
+Mouvement Onze millions de Citoyens, Commission de la Communication"
+                android:textColor="@color/colorAccent" />
+
+            <Button
+                android:id="@+id/confirm_send"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/button_radius"
+                android:text="Envoyer"
+                android:textColor="@color/colorAccent" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <RelativeLayout
+        android:id="@+id/write_bar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:background="@color/colorPrimaryDark"
+        android:visibility="visible">
+
+        <ImageView
+            android:id="@+id/plus"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/colorPrimaryDark"
+            app:srcCompat="@drawable/ic_add_circle_white_24dp" />
+
+        <EditText
+            android:id="@+id/message"
+            android:layout_width="220dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="70dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/editext_radius_white"
+            android:hint="message"
+            android:inputType="text"
+            android:paddingLeft="10dp"
+            android:textCursorDrawable="@null" />
+
+        <ImageView
+            android:id="@+id/send"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/colorPrimaryDark"
+            android:padding="5dp"
+            app:srcCompat="@drawable/ic_send_white_24dp" />
+    </RelativeLayout>
+
+</RelativeLayout>

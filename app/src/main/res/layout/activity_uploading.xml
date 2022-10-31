@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activity_uploading">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="44dp"
+            android:layout_height="41dp"
+            android:clickable="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="11dp"
+            android:padding="3dp"
+            app:srcCompat="@drawable/ic_arrow_back_black_24dp" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="Enregistrement"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/accept"
+            android:layout_width="44dp"
+            android:layout_height="41dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="11dp"
+            android:clickable="true"
+            android:padding="5dp"
+            app:srcCompat="@drawable/ic_check_black_24dp" />
+
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="60dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/registration_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
+            android:text="Enregistrement des Bureaux de votes"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/registration_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="A partir du fichier: bv_xxxxxx.csv"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <Button
+            android:id="@+id/valider"
+            android:layout_width="150dp"
+            android:layout_height="40dp"
+            android:text="valider"
+            android:paddingHorizontal="20dp"
+            android:background="@drawable/button_radius"
+            android:textColor="@color/colorAccent"
+            android:fontFamily="@font/aclonica"
+            android:layout_marginVertical="10dp"
+            android:layout_gravity="center_horizontal"
+            android:drawableLeft="@drawable/ic_check_black_24dp"/>
+        <Button
+            android:id="@+id/change_file"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Changer de fichier?"
+            android:paddingHorizontal="5dp"
+            android:background="@drawable/editext_radius_white"
+            android:textColor="@color/colorPrimaryDark"
+            android:fontFamily="@font/aclonica"
+            android:layout_gravity="center_horizontal"
+            android:drawableLeft="@drawable/ic_insert_drive_file_green_24dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:id="@+id/loading_icon"
+                android:layout_width="44dp"
+                android:layout_height="41dp"
+                android:clickable="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="11dp"
+                android:padding="3dp"
+                app:srcCompat="@drawable/ic_location_black_24dp" />
+            <TextView
+                android:id="@+id/loading_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enregistrement en cours : 43%"
+                android:textColor="@color/colorPrimaryDark"
+                android:fontFamily="@font/aclonica"
+                android:layout_marginLeft="55dp"/>
+
+            <ProgressBar
+                android:id="@+id/loading_progressBar"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="31dp"
+                android:layout_alignStart="@id/loading_state"
+                android:layout_below="@id/loading_state"
+                android:indeterminate="false"
+                android:indeterminateTint="@color/colorPrimaryDark"
+                android:max="100"
+                android:paddingRight="10dp"
+                android:progress="43"
+                android:progressTint="@color/colorPrimaryDark" />
+
+        </RelativeLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey"
+            android:alpha="0.2"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Resumé:"
+            android:fontFamily="@font/aclonica"
+            android:textSize="16dp"
+            android:layout_marginTop="5dp"
+            android:paddingLeft="10dp"
+            android:textColor="@color/colorPrimaryDark"/>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginVertical="10dp"
+            android:gravity="center_horizontal"
+            android:paddingHorizontal="10dp">
+
+
+                <TextView
+                    android:id="@+id/loading_succeed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:fontFamily="@font/aclonica"
+                    android:text="Succes: 31/34"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="14dp" />
+
+                <TextView
+                    android:id="@+id/loading_failed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:fontFamily="@font/aclonica"
+                    android:text="Echecs: 3/34"
+                    android:textColor="@color/red1"
+                    android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/file_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:fontFamily="@font/aclonica"
+                android:text="Erreur lors de l'ouverture du fichier, Verifiez votre fichier puis reessayez !"
+                android:textColor="@color/red1"
+                android:textSize="14dp"
+                android:visibility="gone" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recyclerviewLoading"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                </android.support.v7.widget.RecyclerView>
+
+        </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+</RelativeLayout>

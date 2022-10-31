@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="80dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:clickable="true"
+        android:layout_marginBottom="2dp">
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/round_letter"
+            app:srcCompat="@drawable/ic_person_black_24dp" />
+
+        <TextView
+            android:id="@+id/person_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="66dp"
+            android:text="Nom Prenom"
+            android:textSize="24sp"
+            android:textColor="@color/colorPrimaryDark"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/person_commune"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="66dp"
+            android:layout_marginTop="35dp"
+            android:text="Nom Commune: Commune"
+            android:textColor="@color/grey"
+            android:textSize="14sp"
+            android:textStyle="bold|italic" />
+
+        <TextView
+            android:id="@+id/person_sexe_age"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="66dp"
+            android:layout_marginTop="55dp"
+            android:text="Sexe: M  Age: 30"
+            android:textColor="@color/grey"
+            android:textSize="13sp"
+            android:textStyle="italic" />
+        <TextView
+            android:id="@+id/person_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="186dp"
+            android:layout_marginTop="55dp"
+            android:text="Enregistre le : jj/mm/AAAA"
+            android:textColor="@color/grey"
+            android:textSize="13sp"
+            android:textStyle="italic" />
+    </RelativeLayout>
+</android.support.v7.widget.CardView>
