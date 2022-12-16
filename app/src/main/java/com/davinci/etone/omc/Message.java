@@ -5,7 +5,25 @@ public class Message {
     String recepteur;
     String contenu;
     String disc_id;
+    String etat;
+    String id;
     long date_envoi;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getEtat() {
+        return etat;
+    }
+
+    public void setEtat(String etat) {
+        this.etat = etat;
+    }
 
     public String getDisc_id() {
         return disc_id;
@@ -52,6 +70,7 @@ public class Message {
         this.emetteur = "auteur";
         this.recepteur = "None";
         this.contenu = "contenu";
+        this.etat = "non lu";
         this.date_envoi = 0;
     }
 

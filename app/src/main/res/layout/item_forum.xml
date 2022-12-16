@@ -35,6 +35,8 @@
             android:layout_marginTop="17dp"
             android:layout_marginStart="80dp"
             android:text="FORUM DEC"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />

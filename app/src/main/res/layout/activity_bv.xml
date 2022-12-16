@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -25,30 +26,43 @@
             app:srcCompat="@drawable/ic_arrow_back_black_24dp" />
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="55dp"
             android:text="Bureau de vote"
             android:textColor="@color/colorAccent"
             android:textAlignment="center"
             android:textSize="30sp"/>
 
+        <ImageView
+            android:id="@+id/edit"
+            android:layout_width="44dp"
+            android:layout_height="41dp"
+            android:padding="5dp"
+            android:clickable="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="11dp"
+            app:srcCompat="@drawable/ic_mode_edit_white_24dp" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="44dp"
+            android:layout_height="41dp"
+            android:padding="5dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="60dp"
+            android:indeterminateTint="@color/colorAccent"
+            android:indeterminate="true" />
+
     </RelativeLayout>
 
-    <ProgressBar
-        android:id="@+id/progressBar4"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="60dp"
-        android:indeterminateTint="@color/colorPrimaryDark"
-        android:padding="2dp"
-        android:visibility="gone" />
-
     <LinearLayout
+        android:id="@+id/container"
         android:isScrollContainer="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -57,319 +71,399 @@
         android:orientation="vertical"
         android:padding="5dp">
         <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/bv_container"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nom BV"
-                android:textSize="16dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/aclonica"
-                android:textColor="@color/black"/>
-            <EditText
-                android:id="@+id/nom"
-                android:hint="nom bv"
-                android:fontFamily="serif"
-                android:padding="5dp"
-                android:inputType="text"
-                android:layout_width="250dp"
-                android:background="@drawable/editext_radius_white"
-                android:layout_height="30dp"
-                android:layout_marginLeft="10dp"/>
-        </LinearLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nom BV"
+                    android:textSize="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/black"/>
+                <EditText
+                    android:id="@+id/nom"
+                    android:hint="nom bv"
+                    android:fontFamily="serif"
+                    android:padding="5dp"
+                    android:inputType="text"
+                    android:paddingLeft="7dp"
+                    android:layout_width="250dp"
+                    android:background="@drawable/editext_radius_white"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="10dp"/>
+            </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pays"
-                android:textSize="16dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/aclonica"
-                android:textColor="@color/black"/>
-            <AutoCompleteTextView
-                android:id="@+id/pays"
-                android:hint="Cameroun"
-                android:padding="5dp"
-                android:background="@drawable/editext_radius_white"
-                android:inputType="text"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
-                android:layout_marginLeft="5dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Region"
-                android:textSize="16dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/aclonica"
-                android:textColor="@color/black"/>
-            <AutoCompleteTextView
-                android:id="@+id/region"
-                android:background="@drawable/editext_radius_white"
-                android:inputType="text"
-                android:hint="Cameroun"
-                android:padding="5dp"
-                android:layout_width="110dp"
-                android:layout_height="30dp"
-                android:layout_marginLeft="5dp"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Dept"
-                android:textSize="16dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/aclonica"
-                android:textColor="@color/black"/>
-            <AutoCompleteTextView
-                android:id="@+id/departement"
-                android:background="@drawable/editext_radius_white"
-                android:inputType="text"
-                android:hint="Cameroun"
-                android:padding="5dp"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
-                android:layout_marginLeft="5dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Arrond."
-                android:textSize="16dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/aclonica"
-                android:textColor="@color/black"/>
-            <AutoCompleteTextView
-                android:id="@+id/commune"
-                android:background="@drawable/editext_radius_white"
-                android:inputType="text"
-                android:hint="Cameroun"
-                android:padding="5dp"
-                android:layout_width="105dp"
-                android:layout_height="30dp"
-                android:layout_marginLeft="5dp"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ID Volontaire 1  "
-                android:textSize="16dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/aclonica"
-                android:textColor="@color/black"/>
-            <EditText
-                android:id="@+id/volontaire1"
-                android:background="@drawable/editext_radius_white"
-                android:inputType="text"
-                android:layout_width="160dp"
-                android:layout_height="30dp"
-                android:layout_marginLeft="5dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pays"
+                    android:textSize="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/black"/>
+                <AutoCompleteTextView
+                    android:id="@+id/pays"
+                    android:hint="Cameroun"
+                    android:padding="5dp"
+                    android:background="@drawable/editext_radius_white"
+                    android:inputType="text"
+                    android:layout_width="100dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Region"
+                    android:textSize="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/black"/>
+                <AutoCompleteTextView
+                    android:id="@+id/region"
+                    android:background="@drawable/editext_radius_white"
+                    android:inputType="text"
+                    android:hint="Region"
+                    android:padding="7dp"
+                    android:layout_width="110dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="5dp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dept"
+                    android:textSize="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/black"/>
+                <AutoCompleteTextView
+                    android:id="@+id/departement"
+                    android:background="@drawable/editext_radius_white"
+                    android:inputType="text"
+                    android:hint="departement"
+                    android:padding="5dp"
+                    android:layout_width="100dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Arrond."
+                    android:textSize="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/black"/>
+                <AutoCompleteTextView
+                    android:id="@+id/commune"
+                    android:background="@drawable/editext_radius_white"
+                    android:inputType="text"
+                    android:hint="commune"
+                    android:padding="5dp"
+                    android:layout_width="105dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="5dp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nom Volont. 1  "
+                    android:textSize="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/black"/>
+                <AutoCompleteTextView
+                    android:id="@+id/volontaire1"
+                    android:background="@drawable/editext_radius_white"
+                    android:inputType="text"
+                    android:textSize="13dp"
+                    android:paddingLeft="7dp"
+                    android:layout_width="180dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="5dp"/>
 
-            <ProgressBar
-                android:id="@+id/progressBarVol_1"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="5dp"
-                android:indeterminateTint="@color/colorPrimaryDark"
-                android:padding="2dp" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nom Volont. 2 "
+                    android:textSize="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/black"/>
+                <AutoCompleteTextView
+                    android:id="@+id/volontaire2"
+                    android:background="@drawable/editext_radius_white"
+                    android:inputType="text"
+                    android:textSize="13dp"
+                    android:paddingLeft="7dp"
+                    android:layout_width="180dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="5dp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nom Volont. 3 "
+                    android:textSize="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/black"/>
+                <AutoCompleteTextView
+                    android:id="@+id/volontaire3"
+                    android:background="@drawable/editext_radius_white"
+                    android:inputType="text"
+                    android:textSize="13dp"
+                    android:paddingLeft="7dp"
+                    android:layout_width="180dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="5dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nom Volont. 4 "
+                    android:textSize="16dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/black"/>
+
+                <AutoCompleteTextView
+                    android:id="@+id/volontaire4"
+                    android:background="@drawable/editext_radius_white"
+                    android:inputType="text"
+                    android:textSize="13dp"
+                    android:paddingLeft="7dp"
+                    android:layout_width="180dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="5dp"/>
+
+            </LinearLayout>
+            <Button
+                android:id="@+id/validate"
+                android:layout_width="130dp"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_height="40dp"
+                android:text="Enregistrer"
+                android:textStyle="bold"
+                android:textColor="@color/colorAccent"
+                android:background="@drawable/button_radius"
+                android:visibility="gone"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:id="@+id/container_commune">
+            <TextView
+                android:id="@+id/commune_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Commune"
+                android:gravity="center"
+                android:fontFamily="@font/aclonica"
+                android:textSize="20dp"
+                android:textColor="@color/colorPrimaryDark"/>
+
+            <TextView
+                android:id="@+id/commune_prd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pays, Region, Departement"
+                android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/aclonica"
+                android:textSize="18dp"
+                android:textColor="@color/colorPrimary"/>
+                <TextView
+                    android:id="@+id/nb_bv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="nombre de BV :"
+                    android:textSize="18dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:layout_marginTop="10dp"/>
+                <TextView
+                    android:id="@+id/nb_ins"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="nombre d'inscrits :"
+                    android:textSize="18dp"
+                    android:fontFamily="@font/aclonica"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@color/colorPrimaryDark"/>
+                <TextView
+                    android:id="@+id/nb_pre"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="nombre de preinscrits :"
+                    android:textSize="18dp"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/colorPrimaryDark"/>
+                <TextView
+                    android:id="@+id/nb_mil"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="nombre de Militants :"
+                    android:textSize="18dp"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/colorPrimaryDark"/>
+                <TextView
+                    android:id="@+id/activite_30j"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Activite des 30 jours :"
+                    android:textSize="18dp"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/colorPrimaryDark"/>
+                <TextView
+                    android:id="@+id/activite_24h"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Activite des 24h :"
+                    android:textSize="18dp"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/colorPrimaryDark"/>
+
+            <TextView
+                android:id="@+id/commune_actives"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Communes actives :"
+                android:textSize="18dp"
+                android:clickable="true"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/aclonica"
+                android:textColor="@color/colorPrimaryDark"/>
+            <TextView
+                android:id="@+id/commune_inactives"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Communes Inactives :"
+                android:textSize="18dp"
+                android:clickable="true"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/aclonica"
+                android:textColor="@color/colorPrimaryDark"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@color/colorPrimaryDark"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Membre du Bureau"
+                    android:layout_gravity="center"
+                    android:textSize="18dp"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/aclonica"
+                    android:textColor="@color/colorPrimaryDark"/>
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:orientation="vertical"
+                        android:layout_height="wrap_content">
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recyclerviewCom"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recyclerviewDep"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recyclerviewReg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recyclerviewPays"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    </android.support.v7.widget.RecyclerView>
+                    </LinearLayout>
+                </ScrollView>
+
+            </LinearLayout>
 
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/nom_vol1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nom volontaire 1"
-            android:textSize="12dp"
-            android:layout_marginLeft="160dp"
-            android:fontFamily="@font/aclonica"
-            android:textColor="@color/black"
-            android:textStyle="italic"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ID Volontaire 2 "
-                android:textSize="16dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/aclonica"
-                android:textColor="@color/black"/>
-            <EditText
-                android:id="@+id/volontaire2"
-                android:background="@drawable/editext_radius_white"
-                android:inputType="text"
-                android:layout_width="160dp"
-                android:layout_height="30dp"
-                android:layout_marginLeft="5dp"/>
-            <ProgressBar
-                android:id="@+id/progressBarVol_2"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="5dp"
-                android:indeterminateTint="@color/colorPrimaryDark"
-                android:padding="2dp" />
-        </LinearLayout>
-        <TextView
-            android:id="@+id/nom_vol2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nom volontaire 2"
-            android:textSize="12dp"
-            android:layout_marginLeft="160dp"
-            android:fontFamily="@font/aclonica"
-            android:textColor="@color/black"
-            android:textStyle="italic"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ID Volontaire 3 "
-                android:textSize="16dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/aclonica"
-                android:textColor="@color/black"/>
-            <EditText
-                android:id="@+id/volontaire3"
-                android:background="@drawable/editext_radius_white"
-                android:inputType="text"
-                android:layout_width="160dp"
-                android:layout_height="30dp"
-                android:layout_marginLeft="5dp"/>
-            <ProgressBar
-                android:id="@+id/progressBarVol_3"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="5dp"
-                android:indeterminateTint="@color/colorPrimaryDark"
-                android:padding="2dp" />
-        </LinearLayout>
-        <TextView
-            android:id="@+id/nom_vol3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nom volontaire 3"
-            android:textSize="12dp"
-            android:layout_marginLeft="160dp"
-            android:fontFamily="@font/aclonica"
-            android:textColor="@color/black"
-            android:textStyle="italic"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ID Volontaire 4 "
-                android:textSize="16dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/aclonica"
-                android:textColor="@color/black"/>
-            <EditText
-                android:id="@+id/volontaire4"
-                android:background="@drawable/editext_radius_white"
-                android:inputType="text"
-                android:layout_width="160dp"
-                android:layout_height="30dp"
-                android:layout_marginLeft="5dp"/>
-            <ProgressBar
-                android:id="@+id/progressBarVol_4"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="5dp"
-                android:indeterminateTint="@color/colorPrimaryDark"
-                android:padding="2dp" />
-        </LinearLayout>
-        <TextView
-            android:id="@+id/nom_vol4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nom volontaire 4"
-            android:textSize="12dp"
-            android:layout_marginLeft="160dp"
-            android:fontFamily="@font/aclonica"
-            android:textColor="@color/black"
-            android:textStyle="italic"/>
-        <Button
-            android:id="@+id/but_create"
-            android:layout_width="130dp"
-            android:layout_marginTop="20dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_height="40dp"
-            android:text="Creer"
-            android:textStyle="bold"
-            android:textColor="@color/colorAccent"
-            android:background="@drawable/button_radius"/>
     </LinearLayout>
-    <LinearLayout
+    <TextView
+        android:id="@+id/error"
         android:visibility="gone"
-        android:id="@+id/dialogBox"
-        android:layout_centerInParent="true"
-        android:layout_width="350dp"
-        android:layout_height="120dp"
-        android:orientation="vertical"
-        android:background="@drawable/border_rect_blanc">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:fontFamily="@font/aclonica"
-            android:text="Veuillez verifiez votre boite mail pour confirmer votre inscription"
-            android:gravity="center"/>
-        <EditText
-            android:id="@+id/code"
-            android:layout_width="150dp"
-            android:layout_height="30dp"
-            android:background="@drawable/editext_radius_white"
-            android:layout_gravity="center_horizontal"
-            android:padding="5dp"
-            android:hint="Code"
-            android:inputType="text"
-            android:textAlignment="center"/>
-        <TextView
-            android:id="@+id/ok_but"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ok"
-            android:clickable="true"
-            android:textStyle="bold"
-            android:layout_gravity="end"
-            android:layout_marginEnd="50dp"
-            android:textColor="@color/colorPrimary"/>
-    </LinearLayout>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Probleme de connexion, verifier votre connexion et ressayez svp!"
+        android:textSize="13dp"
+        android:textAlignment="center"
+        android:textStyle="italic"
+        android:background="@drawable/border_rect_blanc_infos"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="5dp"
+        android:fontFamily="@font/aclonica"
+        android:textColor="@color/red"
+        />
 
 
 </RelativeLayout>

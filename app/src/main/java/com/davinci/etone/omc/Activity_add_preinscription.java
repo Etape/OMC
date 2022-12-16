@@ -269,7 +269,7 @@ public class Activity_add_preinscription extends AppCompatActivity {
                     error.setVisibility(View.VISIBLE);
                 }
                 else if(email.getText().toString().isEmpty() || !Patterns.EMAIL_ADDRESS.matcher
-                        (email.getText().toString()).matches()){
+                        (email.getText().toString().trim()).matches()){
                     error.setText("Veuillez renseigner un email correct !");
                     error.setVisibility(View.VISIBLE);
                 }
@@ -278,7 +278,7 @@ public class Activity_add_preinscription extends AppCompatActivity {
                     error.setVisibility(View.VISIBLE);
                 }
                 else if(cni.getText().toString().isEmpty() || cni.getText().toString().length()
-                        !=13){
+                        !=8){
                     error.setText("Veuillez renseigner une cni correcte !");
                     error.setVisibility(View.VISIBLE);
                 }
@@ -294,8 +294,8 @@ public class Activity_add_preinscription extends AppCompatActivity {
                     Preinscription inscription = new Preinscription();
                     inscription.setNom(nom.getText().toString());
                     inscription.setPrenom(prenom.getText().toString());
-                    inscription.setEmail(email.getText().toString());
-                    inscription.setCni(cni.getText().toString());
+                    inscription.setEmail(email.getText().toString().trim());
+                    inscription.setCni(cni.getText().toString().trim());
                     inscription.setTelephone(indicatif.getText().toString() + telephone.getText().toString
                             ());
                     if (getTimestamp(date.getText().toString()) != 0)
@@ -347,8 +347,7 @@ public class Activity_add_preinscription extends AppCompatActivity {
                                                 String key = refPre.push().getKey();
                                                 inscription.setId(key);
                                                 Calendar calendar=Calendar.getInstance();
-                                                inscription.setCreation_date(calendar
-                                                        .getTimeInMillis()/1000);
+                                                inscription.setCreation_date(calendar.getTimeInMillis()/1000);
                                                 refPre.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
@@ -402,6 +401,9 @@ public class Activity_add_preinscription extends AppCompatActivity {
                                 }
                                 if (test) {
                                     String key = refPre.push().getKey();
+                                    inscription.setId(key);
+                                    Calendar calendar=Calendar.getInstance();
+                                    inscription.setCreation_date(calendar.getTimeInMillis()/1000);
                                     refPre.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -462,6 +464,7 @@ public class Activity_add_preinscription extends AppCompatActivity {
         Date date = null;
         try {
             date = (Date)formatter.parse(str_date);
+            timestamp=date.getTime()/1000L;
         } catch (ParseException e) {
             e.printStackTrace();
         }

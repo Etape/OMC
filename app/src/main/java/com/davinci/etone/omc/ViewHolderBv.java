@@ -63,7 +63,7 @@ public class ViewHolderBv extends RecyclerView.Adapter<ViewHolderBv.viewHolder> 
             @Override
             public void onClick(View view) {
                 Intent intent= new Intent(view.getContext(),Activity_bv.class);
-                intent.putExtra("Bv_name+com", bv.getBv_name()+":"+bv.getBv_commune());
+                intent.putExtra("Bv_name+com", bv.getBv_name()+":"+bv.getBv_commune()+":"+bv.getBv_dep());
                 view.getContext().startActivity(intent);
             }
         });

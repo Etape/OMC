@@ -3,6 +3,11 @@ package com.davinci.etone.omc;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
@@ -10,6 +15,8 @@ import android.os.Environment;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -76,8 +83,9 @@ import static com.davinci.etone.omc.R.color.colorAccent;
 import static javax.xml.datatype.DatatypeConstants.DURATION;
 
 public class Activity_dashboard extends AppCompatActivity {
-    ImageView home,tchat,occupancy,inscriptions,rh,back,menu;
+    ImageView home,tchat,occupancy,inscriptions,rh,but_homeMil,but_tchatMil,but_addInsMil,back,menu;
     User user;
+    View first,last;
     FirebaseAuth auth= FirebaseAuth.getInstance();
     TextView dashboard_stat1,dashboard_stat2,dashboard_stat3,dashboard_stat4,dashboard_stat5,
             dashboard_stat6,dashboard_rh_stat1,dashboard_rh_stat2,dashboard_rh_stat3,
@@ -86,7 +94,7 @@ public class Activity_dashboard extends AppCompatActivity {
             dashboard_ins_stat4;
     FirebaseUser Ui=auth.getCurrentUser();
     TextView see_history,no_result_rh,no_result_occ,no_result_ins;
-    LinearLayout filter,dashboard_rh_contain,dashboard_ins_contain,dashboard_occupancy_contain;
+    LinearLayout filter,dashboard_rh_contain,dashboard_ins_contain,dashboard_occupancy_contain,bottomMenuMil;
     RelativeLayout dashboard,dashboard_rh,dashboard_occupancy,dashboard_tchat,
     dashboard_inscription,bottomMenu;
     ImageView add_registration,add_tchat,add_bv,close_selection,add_pre,add_ins;
@@ -149,14 +157,22 @@ public class Activity_dashboard extends AppCompatActivity {
     ArrayList<Discussion> smsDiscs=new ArrayList<>();
     DisplayMetrics displayMetrics;
     int nbrePremois=0,nbrePrejour=0,nbreInsmois=0,nbreInsjour=0;
+    Postes poste;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_dashboard);
         sexe.add("Homme");
         sexe.add("Femme");
         Oui_Non.add("OUI");
         Oui_Non.add("NON");
+
+        Intent serviceIntent = new Intent(Activity_dashboard.this, Service_messaging.class);
+        startService(serviceIntent);
+
+        first=findViewById(R.id.first);
+        last=findViewById(R.id.last);
 
         radio_private=findViewById(R.id.radio_private);
         radio_sms=findViewById(R.id.radio_sms);
@@ -167,7 +183,6 @@ public class Activity_dashboard extends AppCompatActivity {
         progressBar_create_disc=findViewById(R.id.progressBar_create_disc);
         new_disc_box=findViewById(R.id.new_disc_box);
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         recylerViewMil=findViewById(R.id.recyclerviewMil);
         recylerViewBv=findViewById(R.id.recyclerviewBv);
         recylerViewIns=findViewById(R.id.recyclerviewIns);
@@ -278,6 +293,12 @@ public class Activity_dashboard extends AppCompatActivity {
         dashboard_ins_contain=findViewById(R.id.dashboard_ins_contain);
         dashboard_occupancy_contain=findViewById(R.id.dashboard_occupancy_contain);
 
+
+        but_addInsMil=findViewById(R.id.but_addInsMil);
+        but_homeMil=findViewById(R.id.but_homeMil);
+        but_tchatMil=findViewById(R.id.but_tchatMil);
+        bottomMenuMil=findViewById(R.id.bottomMenuMil);
+
         home=findViewById(R.id.but_home);
         tchat=findViewById(R.id.but_tchat);
         occupancy=findViewById(R.id.but_occupancy);
@@ -370,9 +391,39 @@ public class Activity_dashboard extends AppCompatActivity {
         sliderView.setSliderTransformAnimation(SliderAnimations.SIMPLETRANSFORMATION);
         sliderView.startAutoCycle();
 
+        bottomMenu.setVisibility(View.GONE);
+        bottomMenuMil.setVisibility(View.GONE);
+        dashboard.setVisibility(View.GONE);
+        dashboard_rh.setVisibility(View.GONE);
+        dashboard_occupancy.setVisibility(View.GONE);
+        dashboard_tchat.setVisibility(View.GONE);
+        dashboard_inscription.setVisibility(View.GONE);
+        progressBarLoading.setVisibility(View.VISIBLE);
+
+        String NOTIFICATION_CHANNEL_ID = "OMC_id_01";
+        NotificationCompat.Builder b = new NotificationCompat.Builder(Activity_dashboard.this, NOTIFICATION_CHANNEL_ID);
+        CharSequence name = "test";
+        String description = "OMC_Notification";
+        Intent intent=new Intent(Activity_dashboard.this,Activity_menu.class);
+        PendingIntent pendingIntent=PendingIntent.getActivity(Activity_dashboard.this,1,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationChannel mChannel;
+        b.setAutoCancel(true)
+                .setSmallIcon(R.drawable.logo_omc2_50)
+                .setContentTitle("Default notification")
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setContentText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+                .setDefaults(Notification.DEFAULT_LIGHTS| Notification.DEFAULT_SOUND);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(Activity_dashboard.this);
+        notificationManager.notify(1, b.build());
+        Log.i("Notification"," Notification Played");
+
         pays=LoadCountries();
         LoadCommunes();
         DatabaseReference refBv=Db.getReference().child("Bv");
+        DatabaseReference refUs=Db.getReference().child("User");
+        DatabaseReference refPre=Db.getReference().child("Preinscription");
+        DatabaseReference refIns=Db.getReference().child("Inscription");
         refBv.keepSynced(true);
         refBv.addValueEventListener(new ValueEventListener() {
             @Override
@@ -383,12 +434,6 @@ public class Activity_dashboard extends AppCompatActivity {
                     Bv bv=postSnapshot.getValue(Bv.class);
                     allBv.add(bv);
                 }
-
-                /*
-                dashboard_stat2=findViewById(R.id.dashboard_stat2); // couverture des Bv
-                dashboard_occ_stat2=findViewById(R.id.dashboard_occupancy_stat2); // couverture des Bv
-
-                 */
 
 
                 final int[] couverture = {0};
@@ -410,16 +455,375 @@ public class Activity_dashboard extends AppCompatActivity {
                     }
                 }
 
+                refUs.orderByKey().addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        allUsers.clear();
+                        allMil.clear();
+                        millNames.clear();
+                        Log.i("Firebase ","Firebase users loading");
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            User usr=postSnapshot.getValue(User.class);
+                            allUsers.add(usr);
+                            if(!usr.getType().equals("Citoyen") & !usr.getType().equals("citoyen") & !usr
+                                    .getEmail().equals(Ui.getEmail())){
+                                allMil.add(usr);
+                                millNames.add(usr.getNom()+" "+usr.getPrenom());
+                            }
+                            if(usr.getEmail().equals(Ui.getEmail())){
+                                user=usr;
+                                poste= new Postes(user.getType());
+                                Log.i("Firebase user type",user.getType());
+                                Log.i("Firebase categorie",poste.getCategorie());
+
+                                if (poste.getCategorie().equals("C") | poste.getCategorie().equals("D")){
+                                    bottomMenuMil.setVisibility(View.VISIBLE);
+                                    bottomMenu.setVisibility(View.GONE);
+                                }
+                                else{
+                                    bottomMenu.setVisibility(View.VISIBLE);
+                                    bottomMenuMil.setVisibility(View.GONE);
+                                }
+
+                                dashboard.setVisibility(View.VISIBLE);
+                                dashboard_rh.setVisibility(View.GONE);
+                                dashboard_occupancy.setVisibility(View.GONE);
+                                dashboard_tchat.setVisibility(View.GONE);
+                                dashboard_inscription.setVisibility(View.GONE);
+                                progressBarLoading.setVisibility(View.GONE);
+
+                                refPre.orderByKey().addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        allPre.clear();
+                                        preNames.clear();
+                                        ArrayList<Commune> coms = new ArrayList<>();
+                                        ArrayList<User> mils = new ArrayList<>();
+                                        ArrayList<Commune> comsM = new ArrayList<>();
+                                        ArrayList<User> milsM = new ArrayList<>();
+                                        int nbre1819 = 0;
+                                        int nbreDiaspo = 0;
+                                        Log.i("Firebase ", "Firebase Preinscriptions loading");
+                                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                            Preinscription pre = postSnapshot.getValue(Preinscription.class);
+                                            allPre.add(pre);
+                                            preNames.add(pre.getNom() + " " + pre.getPrenom());
+                                        }
+                                        for (int i = 0; i < allPre.size(); i++) {
+                                            if (!filterZonePre(poste, allPre.get(i), user)) {
+                                                allPre.remove(i);
+                                                preNames.remove(i);
+                                            }
+                                        }
+                                        Log.i("Firebase", "Firebase Preinscriptions loaded");
+                                        for (int i = 0; i < allPre.size(); i++) {
+                                            if (calculateAge(Long.valueOf(allPre.get(i).getDate_naissance())) < 20)
+                                                nbre1819++;
+                                            if (!allPre.get(i).getPays().equals("Cameroun") & !allPre.get(i).getPays().equals("Cameroon"))
+                                                nbreDiaspo++;
+                                            long actual = System.currentTimeMillis() / 1000;
+                                            if (actual - allPre.get(i).getCreation_date() < 24 * 3600) {
+                                                nbrePrejour++;
+                                                boolean test = true;
+                                                if (!coms.isEmpty()) {
+                                                    for (int j = 0; j < coms.size(); j++) {
+                                                        if (allPre.get(i).getCommune().equals(coms.get(j).getCom_name())) {
+                                                            coms.get(j).setActivite(coms.get(j).getActivite() + 1);
+                                                            test = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (test == true)
+                                                    coms.add(new Commune(allPre.get(i).getCommune()));
+                                            }
+                                            if (actual - allPre.get(i).getCreation_date() < 30 * 24 * 3600) {
+                                                nbrePremois++;
+                                                boolean test = true;
+                                                if (!comsM.isEmpty()) {
+                                                    for (int j = 0; j < comsM.size(); j++) {
+                                                        if (allPre.get(i).getCommune().equals(comsM.get(j).getCom_name())) {
+                                                            comsM.get(j).setActivite(comsM.get(j).getActivite() + 1);
+                                                            test = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (test == true)
+                                                    comsM.add(new Commune(allPre.get(i).getCommune()));
+                                            }
+                                            if (!allPre.get(i).getParrain().equals("none") & actual - allPre.get(i).getCreation_date() < 24 * 3600) {
+                                                boolean test = true;
+                                                if (!mils.isEmpty()) {
+                                                    for (int j = 0; j < mils.size(); j++) {
+                                                        if (allPre.get(i).getParrain().equals(mils.get(j).getId())) {
+                                                            mils.get(j).setActivite(mils.get(j).getActivite() + 1);
+                                                            test = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (test == true)
+                                                    mils.add(new User(allPre.get(i).getParrain()));
+                                            }
+                                            if (!allPre.get(i).getParrain().equals("none") & actual - allPre.get(i).getCreation_date() < 30 * 24 * 3600) {
+                                                boolean test = true;
+                                                if (!milsM.isEmpty()) {
+                                                    for (int j = 0; j < milsM.size(); j++) {
+                                                        if (allPre.get(i).getParrain().equals(milsM.get(j).getId())) {
+                                                            milsM.get(j).setActivite(milsM.get(j).getActivite() + 1);
+                                                            test = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (test == true)
+                                                    milsM.add(new User(allPre.get(i).getParrain()));
+                                            }
+
+                                        }
+                                        refIns.orderByKey().addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                allIns.clear();
+                                                insNames.clear();
+                                                int nbreInsjour = 0;
+                                                int nbreInsmois = 0;
+                                                int nbreInsDiaspo = 0;
+                                                Log.i("Firebase ", "Firebase Inscriptions loading");
+                                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                                    Inscription ins = postSnapshot.getValue(Inscription.class);
+                                                    allIns.add(ins);
+                                                    insNames.add(ins.getNom() + " " + ins.getPrenom());
+                                                }
+                                                for (int i = 0; i < allIns.size(); i++) {
+                                                    if (!filterZoneIns(poste, allIns.get(i), user)) {
+                                                        allIns.remove(i);
+                                                        insNames.remove(i);
+                                                    }
+                                                }
+                                                Log.i("Firebase ", "Firebase Inscriptions loaded");
+                                                for (int i = 0; i < allIns.size(); i++) {
+                                                    if (!allIns.get(i).getPays().equals("Cameroun") & !allIns.get(i).getPays()
+                                                            .equals("Cameroon"))
+                                                        nbreInsDiaspo++;
+                                                    long actual = System.currentTimeMillis() / 1000;
+                                                    if (actual - allIns.get(i).getCreation_date() < 24 * 3600) {
+                                                        nbreInsjour++;
+                                                        boolean test = true;
+                                                        if (!coms.isEmpty()) {
+                                                            for (int j = 0; j < coms.size(); j++) {
+                                                                if (allIns.get(i).getCommune().equals(coms.get(j).getCom_name())) {
+                                                                    coms.get(j).setActivite(coms.get(j).getActivite() + 1);
+                                                                    test = false;
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (test == true)
+                                                            coms.add(new Commune(allIns.get(i).getCommune()));
+                                                    }
+                                                    if (actual - allIns.get(i).getCreation_date() < 30 * 24 * 3600) {
+                                                        nbreInsmois++;
+                                                        boolean test = true;
+                                                        for (int j = 0; j < comsM.size(); j++) {
+                                                            if (!comsM.isEmpty()) {
+                                                                if (allIns.get(i).getCommune().equals(comsM.get(j).getCom_name())) {
+                                                                    comsM.get(j).setActivite(comsM.get(j).getActivite() + 1);
+                                                                    test = false;
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (test == true)
+                                                            comsM.add(new Commune(allPre.get(i).getCommune()));
+                                                    }
+                                                    if (!allIns.get(i).getParrain().equals("none") & actual - allIns.get(i).getCreation_date() < 24 * 3600) {
+                                                        boolean test = true;
+                                                        for (int j = 0; j < mils.size(); j++) {
+                                                            if (!mils.isEmpty()) {
+                                                                if (allIns.get(i).getParrain().equals(mils.get(j).getId())) {
+                                                                    mils.get(j).setActivite(mils.get(j).getActivite() + 1);
+                                                                    test = false;
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (test == true)
+                                                            mils.add(new User(allIns.get(i).getParrain()));
+                                                    }
+
+                                                    if (!allIns.get(i).getParrain().equals("none") & actual - allIns.get(i).getCreation_date() < 30 * 24 * 3600) {
+                                                        boolean test = true;
+                                                        for (int j = 0; j < milsM.size(); j++) {
+                                                            if (!mils.isEmpty()) {
+                                                                if (allIns.get(i).getParrain().equals(milsM.get(j).getId())) {
+                                                                    milsM.get(j).setActivite(milsM.get(j).getActivite() + 1);
+                                                                    test = false;
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (test == true)
+                                                            milsM.add(new User(allPre.get(i).getParrain()));
+                                                    }
+                                                }
+
+                                                dashboard_ins_stat1.setText("" + nbrePremois);
+                                                dashboard_ins_stat2.setText("" + nbrePrejour);
+                                                dashboard_rh_stat3.setText("" + mostActiveU(mils).getNom());
+                                                dashboard_rh_stat2.setText("" + mostActiveU(milsM).getNom());
+
+                                                dashboard_occ_stat1.setText("" + mostActive(comsM).getCom_name());
+                                                dashboard_stat1.setText("" + mostActive(comsM).getCom_name());
+                                                dashboard_rh_stat1.setText("" + mostActive(comsM).getCom_name());
+
+
+                                                dashboard_rh_stat4.setText("" + mils.size());
+                                                dashboard_occ_stat3.setText("" + coms.size());
+                                                dashboard_occ_stat4.setText("" + (communes.size() - coms.size()));
+                                                dashboard_stat4.setText("" + nbreInsjour);
+                                                if (nbreInsjour == 0) {
+                                                    dashboard_stat4.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
+                                                }
+
+
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                        dashboard_stat6.setText("" + nbreDiaspo);
+                                        dashboard_stat5.setText("" + nbre1819);
+                                        dashboard_ins_stat1.setText("" + nbrePremois);
+                                        dashboard_ins_stat2.setText("" + nbrePrejour);
+                                        dashboard_stat3.setText("" + nbrePrejour);
+                                        dashboard_ins_stat3.setText("" + nbre1819);
+                                        dashboard_ins_stat4.setText("" + nbreDiaspo);
+
+                                        if (nbre1819 == 0) {
+                                            dashboard_stat5.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
+                                            dashboard_ins_stat3.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
+                                        }
+                                        if (nbreDiaspo == 0) {
+                                            dashboard_stat6.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
+                                            dashboard_ins_stat4.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
+                                        }
+                                        if (nbrePremois == 0) {
+                                            dashboard_ins_stat1.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
+                                        }
+                                        if (nbrePrejour == 0) {
+                                            dashboard_ins_stat2.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    }
+                                });
+
+                            }
+
+                        }
+
+                        for(int i=0;i<allUsers.size();i++){
+                            if(!filterZoneUser(poste,allUsers.get(i),user)){
+                                allUsers.remove(i);
+                            }
+                        }
+                        for(int i=0;i<allMil.size();i++){
+                            if(!filterZoneUser(poste,allMil.get(i),user)){
+                                allMil.remove(i);
+                            }
+                        }
+
+                        if (user==null){
+                            auth.signOut();
+                            finish();
+                        }
+                        else{
+                            viewHolderForum=new ViewHolderDiscussions(Activity_dashboard.this,forums,user.getId());
+                            viewHolderSms=new ViewHolderDiscussions(Activity_dashboard.this,smsDiscs,user.getId());
+                            viewHolderPrivate=new ViewHolderDiscussions(Activity_dashboard.this,privateDiscs,user.getId());
+                            forum_recyclerview.setAdapter(viewHolderForum);
+                            sms_recyclerview.setAdapter(viewHolderSms);
+                            private_recyclerview.setAdapter(viewHolderPrivate);
+                            DatabaseReference refDisc=Db.getReference().child("Discussion");
+                            refDisc.orderByKey().addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    forums.clear();
+                                    smsDiscs.clear();
+                                    privateDiscs.clear();
+                                    for(DataSnapshot postSnapshot: dataSnapshot.getChildren()){
+                                        Discussion dis=postSnapshot.getValue(Discussion.class);
+                                        if (dis.getType().equals("forum")){
+                                            forums.add(dis);
+                                        }
+                                        else if(dis.getType().equals("sms") & dis.getInitiateur().equals
+                                                (user.getId())){
+                                            smsDiscs.add(dis);
+                                        }
+                                        else if(dis.getType().equals("tchat") &( dis.getInitiateur()
+                                                .equals(user.getId()) | dis.getInterlocuteur()
+                                                .equals(user.getId()) )){
+                                            privateDiscs.add(dis);
+                                        }
+                                    }
+
+                                    Log.i("fireBase ","Discussion count"+dataSnapshot.getChildrenCount());
+                                    for(int i=0;i<forums.size();i++){
+                                        if(poste.getZone().equals("commune") & forums.get(i).getId().length()<5 &  !forums.get(i).getType().equals("DEC")){
+                                            forums.remove(i);
+                                        }
+                                        else if(poste.getZone().equals("department") & forums.get(i).getId().length()<5 & !forums.get(i).getType().equals("DED") & !forums.get(i).getType()
+                                                .equals("DEC")){
+                                            forums.remove(i);
+                                        }
+                                        else if(poste.getZone().equals("region") & forums.get(i).getId().length()<5 & !forums.get(i).getType().equals("DER") & !forums.get(i).getType().equals("DED") & !forums.get(i).getType()
+                                                .equals("DEC")){
+                                            forums.remove(i);
+                                        }
+                                        else if(poste.getZone().equals("pays") & forums.get(i).getId().length()<5 & !forums.get(i).getType().equals("DEPays") & !forums.get(i).getType().equals("DER") & !forums.get(i).getType().equals("DED") & !forums.get(i).getType()
+                                                .equals("DEC")){
+                                            forums.remove(i);
+                                        }
+                                        else if(poste.getZone().equals("continent") & forums.get(i).getId().length()<5 & !forums.get(i).getType().equals
+                                                ("DECon")& !forums.get(i).getType().equals("DEPays") & !forums.get(i).getType().equals("DER") & !forums.get
+                                                (i).getType().equals("DED") & !forums.get(i).getType().equals("DEC")){
+                                            forums.remove(i);
+                                        }
+                                        else if(poste.getZone().equals("self") & forums.get(i).getId().length()<5){
+                                            forums.remove(i);
+                                        }
+                                        Log.i("Firebase","Forums "+forums.size());
+                                    }
+                                    viewHolderPrivate.notifyDataSetChanged();
+                                    viewHolderForum.notifyDataSetChanged();
+                                    viewHolderSms.notifyDataSetChanged();
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                        Log.i("Firebase ","Firebase users loaded");
+                        Toast.makeText(Activity_dashboard.this, "Firebase Users loaded", Toast
+                                .LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
                 dashboard_stat2.setText(""+couverture[0] +"\n/"+couvertureTotal[0]);
                 dashboard_occ_stat2.setText(""+couverture[0] +"\n/"+couvertureTotal[0]);
                 Log.i("Firebase ","Firebase communes loaded");
-                bottomMenu.setVisibility(View.VISIBLE);
-                dashboard.setVisibility(View.VISIBLE);
-                dashboard_rh.setVisibility(View.GONE);
-                dashboard_occupancy.setVisibility(View.GONE);
-                dashboard_tchat.setVisibility(View.GONE);
-                dashboard_inscription.setVisibility(View.GONE);
-                progressBarLoading.setVisibility(View.GONE);
                 Toast.makeText(Activity_dashboard.this, "Firebase communes loaded", Toast
                         .LENGTH_SHORT).show();
             }
@@ -430,315 +834,8 @@ public class Activity_dashboard extends AppCompatActivity {
             }
         });
 
-        DatabaseReference refUs=Db.getReference().child("User");
-        DatabaseReference refPre=Db.getReference().child("Preinscription");
-        DatabaseReference refIns=Db.getReference().child("Inscription");
-
-        refPre.orderByKey().addValueEventListener(new ValueEventListener(){
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                allPre.clear();
-                preNames.clear();
-                ArrayList<Commune> coms= new ArrayList<>();
-                ArrayList<User> mils= new ArrayList<>();
-                ArrayList<Commune> comsM= new ArrayList<>();
-                ArrayList<User> milsM= new ArrayList<>();
-                int nbre1819=0;
-                int nbreDiaspo=0;
-                Log.i("Firebase ","Firebase Preinscriptions loading");
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Preinscription pre=postSnapshot.getValue(Preinscription.class);
-                    allPre.add(pre);
-                    preNames.add(pre.getNom()+ " "+pre.getPrenom());
-                }
-                Log.i("Firebase","Firebase Preinscriptions loaded");
-                for (int i=0;i<allPre.size();i++){
-                    if(calculateAge(Long.valueOf(allPre.get(i).getDate_naissance()))<20)
-                        nbre1819++;
-                    if(!allPre.get(i).getPays().equals("Cameroun") & !allPre.get(i).getPays().equals("Cameroon"))
-                        nbreDiaspo++;
-                    long actual=System.currentTimeMillis()/1000;
-                    if (actual-allPre.get(i).getCreation_date()<24*3600){
-                        nbrePrejour++;
-                        boolean test=true;
-                        for(int j =0;j<coms.size();j++){
-                            if(!coms.isEmpty()){
-                            if(allPre.get(i).getCommune().equals(coms.get(j).getCom_name()))
-                            {
-                                coms.get(j).setActivite(coms.get(j).getActivite()+1);
-                                test=false;
-                                break;
-                            }
-                            }
-                        }
-                        if (test==true)
-                            coms.add(new Commune(allPre.get(i).getCommune()));
-                    }
-                    if (actual-allPre.get(i).getCreation_date()<30*24*3600){
-                        nbrePremois++;
-                        boolean test=true;
-                        for(int j =0;j<coms.size();j++){
-                            if(!comsM.isEmpty()){
-                            if(allPre.get(i).getCommune().equals(comsM.get(j).getCom_name()))
-                            {
-                                comsM.get(j).setActivite(comsM.get(j).getActivite()+1);
-                                test=false;
-                                break;
-                            }}
-                        }
-                        if (test==true)
-                            comsM.add(new Commune(allPre.get(i).getCommune()));
-                    }
-                    if (!allPre.get(i).getParrain().equals("none") & actual-allPre.get(i).getCreation_date()<24*3600)
-                    {
-                        boolean test=true;
-                        for(int j =0;j<mils.size();j++){
-                            if(!mils.isEmpty()){
-                                if(allPre.get(i).getParrain().equals(mils.get(j).getId()))
-                                {
-                                    mils.get(j).setActivite(mils.get(j).getActivite()+1);
-                                    test=false;
-                                    break;
-                                }
-                            }
-                        }
-                        if (test==true)
-                        mils.add(new User(allPre.get(i).getParrain()));
-                    }
-                    if (!allPre.get(i).getParrain().equals("none") & actual-allPre.get(i).getCreation_date()<30*24*3600)
-                    {
-                        boolean test=true;
-                        for(int j =0;j<mils.size();j++){
-                            if(!milsM.isEmpty()){
-                                if(allPre.get(i).getParrain().equals(milsM.get(j).getId())) {
-                                    milsM.get(j).setActivite(milsM.get(j).getActivite()+1);
-                                    test=false;
-                                    break;
-                                }
-                            }
-                        }
-                        if (test==true)
-                            mils.add(new User(allPre.get(i).getParrain()));
-                    }
-
-                }
-                /*
-                dashboard_stat2=findViewById(R.id.dashboard_stat2); // couverture des Bv
-                dashboard_occ_stat2=findViewById(R.id.dashboard_occupancy_stat2); // couverture des Bv
-
-                 */
-                refIns.orderByKey().addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        allIns.clear();
-                        insNames.clear();
-                        int nbreInsjour=0;
-                        int nbreInsmois=0;
-                        int nbreInsDiaspo=0;
-                        Log.i("Firebase ","Firebase Inscriptions loading");
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            Inscription ins=postSnapshot.getValue(Inscription.class);
-                            allIns.add(ins);
-                            insNames.add(ins.getNom()+ " "+ins.getPrenom());
-                        }
-                        Log.i("Firebase ","Firebase Inscriptions loaded");
-                        for (int i=0;i<allIns.size();i++){
-                            if(!allIns.get(i).getPays().equals("Cameroun") & !allIns.get(i).getPays()
-                                    .equals("Cameroon"))
-                                nbreInsDiaspo++;
-                            long actual=System.currentTimeMillis()/1000;
-                            if (actual-allIns.get(i).getCreation_date()<24*3600){
-                                nbreInsjour++;
-                                boolean test=true;
-                                if(!coms.isEmpty()){
-                                for(int j =0;j<coms.size();j++){
-                                    if(allIns.get(i).getCommune().equals(coms.get(j).getCom_name()))
-                                    {
-                                        coms.get(j).setActivite(coms.get(j).getActivite()+1);
-                                        test=false;
-                                        break;
-                                    }}
-                                }
-                                if(test==true)
-                                    coms.add(new Commune(allIns.get(i).getCommune()));
-                            }
-                            if(actual-allIns.get(i).getCreation_date()<30*24*3600){
-                                nbreInsmois++;
-                                boolean test=true;
-                                for(int j =0;j<comsM.size();j++){
-                                    if(!comsM.isEmpty()){
-                                    if(allIns.get(i).getCommune().equals(comsM.get(j).getCom_name()))
-                                    {
-                                        comsM.get(j).setActivite(comsM.get(j).getActivite()+1);
-                                        test=false;
-                                        break;
-                                    }}
-                                }
-                                if (test==true)
-                                    comsM.add(new Commune(allPre.get(i).getCommune()));
-                            }
-                            if(!allIns.get(i).getParrain().equals("none") & actual-allIns.get(i).getCreation_date()<24*3600){
-                                boolean test=true;
-                                for(int j =0;j<mils.size();j++){
-                                    if(!mils.isEmpty()){
-                                    if(allIns.get(i).getParrain().equals(mils.get(j).getId()))
-                                    {
-                                        mils.get(j).setActivite(mils.get(j).getActivite()+1);
-                                        test=false;
-                                        break;
-                                    }}
-                                }
-                                if (test==true)
-                                    mils.add(new User(allIns.get(i).getParrain()));
-                            }
-
-                            if (!allIns.get(i).getParrain().equals("none") & actual-allIns.get(i).getCreation_date()<30*24*3600)
-                            {
-                                boolean test=true;
-                                for(int j =0;j<milsM.size();j++){
-                                    if(!mils.isEmpty()){
-                                    if(allIns.get(i).getParrain().equals(milsM.get(j).getId()))
-                                    {
-                                        milsM.get(j).setActivite(milsM.get(j).getActivite()+1);
-                                        test=false;
-                                        break;
-                                    }
-                                    }
-                                }
-                                if (test==true)
-                                    milsM.add(new User(allPre.get(i).getParrain()));
-                            }
-                        }
-
-                        dashboard_ins_stat1.setText(""+nbrePremois);
-                        dashboard_ins_stat2.setText(""+nbrePrejour);
-                        dashboard_rh_stat3.setText(""+mostActiveU(mils).getNom());
-                        dashboard_rh_stat2.setText(""+mostActiveU(milsM).getNom());
-
-                        dashboard_occ_stat1.setText(""+mostActive(comsM).getCom_name());
-                        dashboard_stat1.setText(""+mostActive(comsM).getCom_name());
-                        dashboard_rh_stat1.setText(""+mostActive(comsM).getCom_name());
-
-
-                        dashboard_rh_stat4.setText(""+mils.size());
-                        dashboard_occ_stat3.setText(""+coms.size());
-                        dashboard_occ_stat4.setText(""+(communes.size()-coms.size()));
-                        dashboard_stat4.setText(""+nbreInsjour);
-                        if (nbreInsjour==0){
-                            dashboard_stat4.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
-                        }
-
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-                dashboard_stat6.setText(""+nbreDiaspo);
-                dashboard_stat5.setText(""+nbre1819);
-                dashboard_ins_stat1.setText(""+nbrePremois);
-                dashboard_ins_stat2.setText(""+nbrePrejour);
-                dashboard_stat3.setText(""+nbrePrejour);
-                dashboard_ins_stat3.setText(""+nbre1819);
-                dashboard_ins_stat4.setText(""+nbreDiaspo);
-
-                if (nbre1819==0){
-                    dashboard_stat5.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
-                    dashboard_ins_stat3.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
-                }
-                if (nbreDiaspo==0){
-                    dashboard_stat6.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
-                    dashboard_ins_stat4.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
-                }
-                if (nbrePremois==0){
-                    dashboard_ins_stat1.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
-                }
-                if (nbrePrejour==0){
-                    dashboard_ins_stat2.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
-        refUs.orderByKey().addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                allUsers.clear();
-                allMil.clear();
-                millNames.clear();
-                Log.i("Firebase ","Firebase users loading");
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    User usr=postSnapshot.getValue(User.class);
-                    allUsers.add(usr);
-                    if(!usr.getType().equals("Citoyen") & !usr.getType().equals("citoyen") & !usr
-                            .getEmail().equals(Ui.getEmail())){
-                        allMil.add(usr);
-                        millNames.add(usr.getNom()+" "+usr.getPrenom());
-                    }
-                    if(usr.getEmail().equals(Ui.getEmail()))
-                        user=usr;
-                }
-                if(user!=null){
-                   viewHolderForum=new ViewHolderDiscussions(Activity_dashboard.this,forums,user
-                           .getId());
-                    viewHolderSms=new ViewHolderDiscussions(Activity_dashboard.this,smsDiscs,user
-                            .getId());
-                    viewHolderPrivate=new ViewHolderDiscussions(Activity_dashboard.this,privateDiscs,user
-                            .getId());
-                    forum_recyclerview.setAdapter(viewHolderForum);
-                    sms_recyclerview.setAdapter(viewHolderSms);
-                    private_recyclerview.setAdapter(viewHolderPrivate);
-
-                    DatabaseReference refDisc=Db.getReference().child("Discussion");
-                    refDisc.orderByKey().addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            forums.clear();
-                            smsDiscs.clear();
-                            privateDiscs.clear();
-                            for(DataSnapshot postSnapshot: dataSnapshot.getChildren()){
-                                Log.i("fireBase ","Discussion count"+dataSnapshot.getChildrenCount());
-                                Discussion dis=postSnapshot.getValue(Discussion.class);
-                                if (dis.getType().equals("forum")){
-                                    forums.add(dis);
-                                }
-                                else if(dis.getType().equals("sms") & dis.getInitiateur().equals
-                                        (user.getId())){
-                                    smsDiscs.add(dis);
-                                }
-                                else if(dis.getType().equals("tchat") &( dis.getInitiateur()
-                                        .equals(user.getId()) | dis.getInterlocuteur()
-                                        .equals(user.getId()) )){
-                                    privateDiscs.add(dis);
-                                }
-                            }
-                            viewHolderPrivate.notifyDataSetChanged();
-                            viewHolderForum.notifyDataSetChanged();
-                            viewHolderSms.notifyDataSetChanged();
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-
-                }
-                Log.i("Firebase ","Firebase users loaded");
-                Toast.makeText(Activity_dashboard.this, "Firebase Users loaded", Toast
-                        .LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        if(poste!=null) {
+        }
         ArrayAdapter<String> adapter_yes = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line, Oui_Non);
         search_pays.setAdapter(adapter_yes);
@@ -1017,6 +1114,7 @@ public class Activity_dashboard extends AppCompatActivity {
                 for (int i = 0; i < allMil.size(); i++) {
                     User usr = allMil.get(i);
                     if(research_bar_rh.getText().toString().trim().equals("*")){
+                        if (usr.getId().length()>4)
                         ResultsMil.add(usr);
                     }
                     else  if (ifPassFilter(usr, filter1, research_bar_rh.getText().toString())) {
@@ -1438,6 +1536,28 @@ public class Activity_dashboard extends AppCompatActivity {
                 //butt_raduis_up_left
             }
         });
+        but_homeMil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                filter1.setType("none");
+                dashboard.setVisibility(View.VISIBLE);
+                dashboard_rh.setVisibility(View.GONE);
+                dashboard_occupancy.setVisibility(View.GONE);
+                dashboard_tchat.setVisibility(View.GONE);
+                dashboard_inscription.setVisibility(View.GONE);
+                first.setBackgroundResource(R.drawable.butt_radius_right);
+                last.setBackgroundResource(R.color.colorPrimaryDark);
+                but_homeMil.setBackgroundResource(R.color.colorAccent);
+                but_homeMil.setImageResource(R.drawable.ic_home_green_24dp);
+                but_tchatMil.setBackgroundResource(R.drawable.butt_raduis_up_left);
+                but_tchatMil.setImageResource(R.drawable.ic_textsms_white_24dp);
+                occupancy.setBackgroundResource(R.color.colorPrimaryDark);
+                occupancy.setImageResource(R.drawable.ic_occupancy_white_24dp);
+                but_addInsMil.setBackgroundResource(R.color.colorPrimaryDark);
+                but_addInsMil.setImageResource(R.drawable.ic_note_add_white_24dp);
+                //butt_raduis_up_left
+            }
+        });
         rh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1535,6 +1655,25 @@ public class Activity_dashboard extends AppCompatActivity {
                 //butt_raduis_up_left
             }
         });
+        but_tchatMil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dashboard.setVisibility(View.GONE);
+                dashboard_rh.setVisibility(View.GONE);
+                dashboard_occupancy.setVisibility(View.GONE);
+                dashboard_tchat.setVisibility(View.VISIBLE);
+                dashboard_inscription.setVisibility(View.GONE);
+                first.setBackgroundResource(R.color.colorPrimaryDark);
+                last.setBackgroundResource(R.color.colorPrimaryDark);
+                but_homeMil.setImageResource(R.drawable.ic_home_white_24dp);
+                but_homeMil.setBackgroundResource(R.drawable.butt_radius_right);
+                but_tchatMil.setBackgroundResource(R.color.colorAccent);
+                but_tchatMil.setImageResource(R.drawable.ic_textsms_black_24dp);
+                but_addInsMil.setBackgroundResource(R.drawable.butt_raduis_up_left);
+                but_addInsMil.setImageResource(R.drawable.ic_note_add_white_24dp);
+                //butt_raduis_up_left
+            }
+        });
         menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1561,6 +1700,41 @@ public class Activity_dashboard extends AppCompatActivity {
                 tchat.setImageResource(R.drawable.ic_textsms_white_24dp);
                 inscriptions.setBackgroundResource(R.color.colorAccent);
                 inscriptions.setImageResource(R.drawable.ic_note_add_black_24dp);
+                filter_select_where.clearCheck();
+                radio_ins.setVisibility(View.VISIBLE);
+                radio_militant.setVisibility(View.GONE);
+                radio_pre.setVisibility(View.VISIBLE);
+                radio_Dec.setVisibility(View.GONE);
+                radio_Dep.setVisibility(View.GONE);
+                radio_Der.setVisibility(View.GONE);
+                radio_BV.setVisibility(View.GONE);
+                radio_commune.setVisibility(View.GONE);
+                radio_reg.setVisibility(View.GONE);
+                radio_pays.setVisibility(View.GONE);
+                radio_dep.setVisibility(View.GONE);
+                layout_period.setVisibility(View.VISIBLE);
+                human_filter.setVisibility(View.VISIBLE);
+                search_origine.setVisibility(View.VISIBLE);
+                //butt_raduis_up_left
+            }
+        });
+        but_addInsMil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                filter1.setType("none");
+                dashboard.setVisibility(View.GONE);
+                dashboard_rh.setVisibility(View.GONE);
+                dashboard_occupancy.setVisibility(View.GONE);
+                dashboard_tchat.setVisibility(View.GONE);
+                dashboard_inscription.setVisibility(View.VISIBLE);
+                first.setBackgroundResource(R.color.colorPrimaryDark);
+                last.setBackgroundResource(R.drawable.butt_raduis_up_left);
+                but_homeMil.setImageResource(R.drawable.ic_home_white_24dp);
+                but_homeMil.setBackgroundResource(R.color.colorPrimaryDark);
+                but_tchatMil.setBackgroundResource(R.drawable.butt_radius_right);
+                but_tchatMil.setImageResource(R.drawable.ic_textsms_white_24dp);
+                but_addInsMil.setBackgroundResource(R.color.colorAccent);
+                but_addInsMil.setImageResource(R.drawable.ic_note_add_black_24dp);
                 filter_select_where.clearCheck();
                 radio_ins.setVisibility(View.VISIBLE);
                 radio_militant.setVisibility(View.GONE);
@@ -1681,7 +1855,6 @@ public class Activity_dashboard extends AppCompatActivity {
         }
         return countries;
     }
-
     private String getID(ArrayList<User> userlist,String key){
         for (int i=0;i<userlist.size();i++){
             String nom_prenom=userlist.get(i).getNom()+ " "+userlist.get(i).getPrenom();
@@ -1844,6 +2017,110 @@ public class Activity_dashboard extends AppCompatActivity {
 
         return true;
     }
+    private boolean filterZoneUser(Postes poste,User user,User userRef){
+        String zone =poste.getZone();
+        if(zone.equals("commune")){
+            if(userRef.getCommune().equals(user.getCommune()))
+                return true;
+        }
+        if(zone.equals("department")){
+            if(userRef.getDepartement().equals(user.getDepartement()))
+                return true;
+        }
+        if(zone.equals("region")){
+            if(userRef.getRegion().equals(user.getRegion()))
+                return true;
+        }
+        if(zone.equals("pays")){
+            if(userRef.getPays().equals(user.getPays()))
+                return true;
+        }
+        if(zone.equals("all")){
+                return true;
+        }
+        return false;
+    }
+    private boolean filterZonePre(Postes poste,Preinscription pre,User userRef){
+        String zone =poste.getZone();
+        if(zone.equals("commune")){
+            if(userRef.getCommune().equals(pre.getCommune()))
+                return true;
+        }
+        if(zone.equals("department")){
+            if(userRef.getDepartement().equals(pre.getDepartement()))
+                return true;
+        }
+        if(zone.equals("region")){
+            if(userRef.getRegion().equals(pre.getRegion()))
+                return true;
+        }
+        if(zone.equals("pays")){
+            if(userRef.getPays().equals(pre.getPays()))
+                return true;
+        }
+        if(zone.equals("all")){
+            return true;
+        }
+        if(zone.equals("self") | zone.equals("com")){
+            if(userRef.getId().equals(pre.getParrain()))
+                return true;
+        }
+        return false;
+    }
+    private boolean filterZoneIns(Postes poste,Inscription ins,User userRef){
+        String zone =poste.getZone();
+        if(zone.equals("commune")){
+            if(userRef.getCommune().equals(ins.getCommune()))
+                return true;
+        }
+        if(zone.equals("department")){
+            if(userRef.getDepartement().equals(ins.getDepartement()))
+                return true;
+        }
+        if(zone.equals("region")){
+            if(userRef.getRegion().equals(ins.getRegion()))
+                return true;
+        }
+        if(zone.equals("pays")){
+            if(userRef.getPays().equals(ins.getPays()))
+                return true;
+        }
+        if(zone.equals("all")){
+            return true;
+        }
+        if(zone.equals("self") | zone.equals("com")){
+            if(userRef.getId().equals(ins.getParrain()))
+                return true;
+        }
+        return false;
+    }
+    private boolean filterZoneBv(Postes poste,Bv bv,User userRef){
+        String zone =poste.getZone();
+        if(zone.equals("commune")){
+            if(userRef.getCommune().equals(bv.getBv_commune()))
+                return true;
+        }
+        if(zone.equals("department")){
+            if(userRef.getDepartement().equals(bv.getBv_dep()))
+                return true;
+        }
+        if(zone.equals("region")){
+            if(userRef.getRegion().equals(bv.getBv_region()))
+                return true;
+        }
+        if(zone.equals("pays")){
+            if(userRef.getPays().equals(bv.getBv_pays()))
+                return true;
+        }
+        if(zone.equals("all")){
+            return true;
+        }
+        if(zone.equals("self") | zone.equals("com") ){
+            if(userRef.getId().equals(bv.getBv_commune()))
+                return true;
+        }
+        return false;
+    }
     private long getTimestamp(String str_date){
         long timestamp = 0;
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
@@ -1944,7 +2221,6 @@ public class Activity_dashboard extends AppCompatActivity {
         }
         return most;
     }
-
     private String getDate(long time) {
         java.util.Calendar cal = java.util.Calendar.getInstance(Locale.ENGLISH);
         cal.setTimeInMillis(time * 1000);

@@ -2,6 +2,7 @@ package com.davinci.etone.omc;
 
 public class User {
     String id="none";
+    String code="none";
     String nom="none";
     String prenom="none";
     String sexe="none";
@@ -20,8 +21,35 @@ public class User {
     String sympatisant="none";
     String parti="none";
     String parrain="none";
+    String sous_comite_arr="none";
+    String comite_base="none";
     long creation_date=0;
     int activite=0;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String id) {
+        if (this.id.length()>10)
+            this.code=this.id.substring(this.id.length()-9,this.id.length()-1);
+    }
+
+    public String getSous_comite_arr() {
+        return sous_comite_arr;
+    }
+
+    public void setSous_comite_arr(String sous_comite_arr) {
+        this.sous_comite_arr = sous_comite_arr;
+    }
+
+    public String getComite_base() {
+        return comite_base;
+    }
+
+    public void setComite_base(String comite_base) {
+        this.comite_base = comite_base;
+    }
 
     public int getActivite() {
         return activite;
@@ -69,6 +97,8 @@ public class User {
 
     public void setId(String id) {
         this.id = id;
+        if(id.length()>9)
+        this.code=id.substring(id.length()-9,id.length()-1);
     }
 
     public String getNom() {
@@ -213,6 +243,7 @@ public class User {
     }
     public User() {
         this.id = "id";
+        this.code = "id";
         this.nom = "none";
         this.prenom = "none";
         this.sexe = "none";
@@ -228,6 +259,8 @@ public class User {
         this.departement_org = "none";
         this.cni = "none";
         this.sympatisant = "none";
+        this.comite_base = "none";
+        this.sous_comite_arr = "none";
     }
 
     public User(String id) {

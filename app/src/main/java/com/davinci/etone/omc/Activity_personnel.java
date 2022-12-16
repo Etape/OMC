@@ -91,26 +91,27 @@ public class Activity_personnel extends AppCompatActivity {
             regions.add("NORD-OUEST");
             regions.add("SUD");
 
-            if(Ui.getEmail().contains("admin"))
-                postes.add("Admin");
-            postes.add("Militant");
-            postes.add("DEC");
-            postes.add("DED");
-            postes.add("DER");
-            postes.add("DEP");
-            postes.add("DEPays");
-            postes.add("DECon");
+            postes.add("PN");
             postes.add("SG");
-            postes.add("Mandataire");
-            postes.add("SG CA");
-            postes.add("Resp. Lobbying");
-            postes.add("Resp. Communication");
-            postes.add("SG 1");
-            postes.add("SG 2");
-            postes.add("SG 3");
+            postes.add("DEP");
+            postes.add("DED");
+            postes.add("DEC");
+            postes.add("DECON");
+            postes.add("DEPAYS");
             postes.add("Point Focal Region");
-            postes.add("SG Dept");
-            postes.add("Delegue Region");
+            postes.add("SG DEP");
+            postes.add("Delegue Regional");
+            postes.add("SG CA");
+            postes.add("Resp. Comm + Pub");
+            postes.add("Agent Comm");
+            postes.add("Resp. Lobbying");
+            postes.add("SG1 DEP");
+            postes.add("SG2 DEP");
+            postes.add("SG3 DEP");
+            postes.add("Mandataire ELECAM");
+            postes.add("Volontaire");
+            postes.add("Militant");
+            postes.add("Citoyen");
 
             while ((line = reader.readLine()) != null) {
                 String[] cells = line.split(";");
@@ -195,6 +196,8 @@ public class Activity_personnel extends AppCompatActivity {
                     id.setText("Id : "+user.getId());
                     commune.setText("Militant Commune : "+user.getCommune());
                     poste.setText("Poste : "+user.getType());
+                    edit_commune.setText(user.getCommune());
+                    edit_poste.setText(user.getType());
                     telephone.setText("Telephone : "+user.getTelephone());
                     complete_name.setText(user.getNom()+" "+ user.getPrenom());
                     round_letter.setText(""+user.getNom().toUpperCase().charAt(0));
@@ -225,14 +228,37 @@ public class Activity_personnel extends AppCompatActivity {
                                   refUser.child(user.getId()).child("departement").setValue
                                           (getDepartement(edit_commune.getText().toString()));
                                   refUser.child(user.getId()).child("commune").setValue(edit_commune.getText().toString());
-                                  refUser.child(user.getId()).child("type").setValue(user_id);
+                                  refUser.child(user.getId()).child("type").setValue(edit_poste.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                      @Override
+                                      public void onComplete(@NonNull Task<Void> task) {
+                                          if(task.isSuccessful()){
+                                              progressBar.setVisibility(View.GONE);
+                                              edit.setImageResource(R.drawable.ic_mode_edit_white_24dp);
+                                              edits.setVisibility(View.GONE);
+                                              commune.setText("Militant Commune : "+edit_commune.getText().toString());
+                                              poste.setText("Poste : "+edit_poste.getText().toString());
+                                              commune.setVisibility(View.VISIBLE);
+                                              poste.setVisibility(View.VISIBLE);
+                                          }
+                                          else {
+                                              progressBar.setVisibility(View.GONE);
+                                              edit.setImageResource(R.drawable.ic_mode_edit_white_24dp);
+                                              edits.setVisibility(View.GONE);
+                                              commune.setVisibility(View.VISIBLE);
+                                              poste.setVisibility(View.VISIBLE);
+                                              Toast.makeText(Activity_personnel.this, "Modification echouee, verifiez votre connexion Internet",
+                                                      Toast.LENGTH_SHORT).show();
+                                          }
+
+
+                                      }
+                                  });
                               }
-                                progressBar.setVisibility(View.GONE);
                             }
                             else{
                                 edit.setImageResource(R.drawable.ic_check_black_24dp);
                                 edits.setVisibility(View.VISIBLE);
-                                edit_commune.setText(user.getCommune());
+                                edit_commune.setText(edit_commune.getText().toString());
                                 edit_poste.setText(user.getType());
                                 commune.setVisibility(View.GONE);
                                 poste.setVisibility(View.GONE);
@@ -411,10 +437,8 @@ public class Activity_personnel extends AppCompatActivity {
                                                        couvertureInsmois[0]++;
                                                }
                                            }
-                                           efforts_totaux.setText("Efforts globaux : " +
-                                                   ""+couverturePre[0]+"/"+couvertureIns[0]);
-                                           efforts_mois.setText("Efforts des derniers 30 jours :" +
-                                                   ""+couverturePremois[0]+"/"+couvertureInsmois[0]);
+                                           efforts_totaux.setText("Efforts globaux : " + ""+couverturePre[0]+"/"+couvertureIns[0]);
+                                           efforts_mois.setText("Efforts des derniers 30 jours :" + ""+couverturePremois[0]+"/"+couvertureInsmois[0]);
                                            progressBar.setVisibility(View.GONE);
                                        }
 

@@ -3,6 +3,7 @@ package com.davinci.etone.omc;
 public class Bv {
     String bv_name;
     String bv_region;
+    String bv_pays="Cameroun";
     String bv_dep;
     String bv_commune;
     int bv_attente;
@@ -52,6 +53,15 @@ public class Bv {
         this.bv_vol3_tel = "none";
         this.bv_vol4_name = "none";
         this.bv_vol4_tel = "none";
+        this.bv_pays = "Cameroun";
+    }
+
+    public String getBv_pays() {
+        return bv_pays;
+    }
+
+    public void setBv_pays(String bv_pays) {
+        this.bv_pays = bv_pays;
     }
 
     public String getBv_name() {

@@ -214,6 +214,7 @@ public class Activity_tchat extends AppCompatActivity {
                         DatabaseReference refDisc=Db.getReference().child("Discussion");
                         DatabaseReference refMes=Db.getReference().child("Message");
                         String key=refMes.push().getKey();
+                        mes.setId(key);
                         refMes.child(key).setValue(mes);
                         refDisc.child(disc_id).child("last_message").setValue(mes.getContenu());
                         refDisc.child(disc_id).child("last_writer").setValue(user_id);
@@ -247,6 +248,7 @@ public class Activity_tchat extends AppCompatActivity {
                 DatabaseReference refDisc=Db.getReference().child("Discussion");
                 DatabaseReference refMes=Db.getReference().child("Message");
                 String key=refMes.push().getKey();
+                mes.setId(key);
                 refMes.child(key).setValue(mes);
                 refDisc.child(disc_id).child("last_message").setValue(mes.getContenu());
                 refDisc.child(disc_id).child("last_writer").setValue(user_id);

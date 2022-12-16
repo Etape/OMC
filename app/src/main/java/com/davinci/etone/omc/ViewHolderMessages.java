@@ -37,6 +37,7 @@ public class ViewHolderMessages extends RecyclerView.Adapter<ViewHolderMessages.
     ArrayList<Message> list;
     String userId;
     private FirebaseDatabase Db=FirebaseDatabase.getInstance();
+    DatabaseReference refMes=Db.getReference().child("Message");
 
     public ViewHolderMessages(Context context, ArrayList<Message> list,String type,String userId) {
         this.context = context;
@@ -62,6 +63,29 @@ public class ViewHolderMessages extends RecyclerView.Adapter<ViewHolderMessages.
             viewHolder.container2.setBackgroundResource(R.drawable.border_rect_gris_2);
             viewHolder.container1.setGravity(Gravity.END);
             viewHolder.usr.setVisibility(View.GONE);
+        }
+        if(message.getEtat().equals("non lu")){
+            message.setEtat("lu");
+            refMes.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Log.i("Firebase ","Firebase users loading");
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        Message mes = postSnapshot.getValue(Message.class);
+                        if (mes.getDate_envoi()== message.getDate_envoi() & mes.getEmetteur().equals(message.getEmetteur()))
+                        {
+                            message.setId(postSnapshot.getKey());
+                            refMes.child(postSnapshot.getKey()).setValue(message);
+                            break;
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         }
         if(!type.equals("forum"))
             viewHolder.usr.setVisibility(View.GONE);

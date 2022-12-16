@@ -25,6 +25,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class ViewHolderDiscussions extends RecyclerView.Adapter<ViewHolderDiscussions.viewHolder> {
@@ -59,20 +61,49 @@ public class ViewHolderDiscussions extends RecyclerView.Adapter<ViewHolderDiscus
             viewHolder.icon_txt.setTextColor(R.color.colorPrimaryDark);
             viewHolder.icon_txt.setBackgroundResource(R.drawable.round_letter);
         }
-        else if (disc.getType().equals("tchat"))
+        else if (disc.getType().equals("tchat")){
             viewHolder.icon_txt.setBackgroundResource(R.drawable.round_letter_tchat);
+            Db.getReference().child("User").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Log.i("Firebase ","Firebase users loading");
+                    User user = null,user2 = null;
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        User usr = postSnapshot.getValue(User.class);
+                        if (usr.getId().equals(user_id))
+                        {
+                            user=usr;
+                        }
+                        else if(usr.getId().equals(disc.getInitiateur()) & !usr.getId().equals(user_id)){
+                            user2=usr;
+                        }
+                        if(user2!=null & user!=null)
+                            break;
+
+                    }
+                    if(user2!=null & disc.getTitle().equals(user.getNom())){
+                        viewHolder.interlocuteur.setText(user2.getNom());
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
 
         viewHolder.container.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                @Override
+                public void onClick(View view) {
 
-                Intent intent= new Intent(view.getContext(),Activity_tchat.class);
-                intent.putExtra("Id_disc",disc.getId());
-                intent.putExtra("user_id",user_id);
-                intent.putExtra("disc_title",disc.getTitle());
-                intent.putExtra("type",disc.getType());
-                view.getContext().startActivity(intent);
-            }
+                    Intent intent= new Intent(view.getContext(),Activity_tchat.class);
+                    intent.putExtra("Id_disc",disc.getId());
+                    intent.putExtra("user_id",user_id);
+                    intent.putExtra("disc_title",disc.getTitle());
+                    intent.putExtra("type",disc.getType());
+                    view.getContext().startActivity(intent);
+                }
         });
         if (user_id.equals(disc.getLast_writer()))
             viewHolder.last_user.setText("Vous:");
@@ -124,6 +155,12 @@ public class ViewHolderDiscussions extends RecyclerView.Adapter<ViewHolderDiscus
         long currentTime=System.currentTimeMillis()/1000;
         if (currentTime-time<(24*3600)) {
             String date = DateFormat.format("hh:mm", cal).toString();
+            Calendar now = Calendar.getInstance();
+            int dayP = now.get(Calendar.DAY_OF_WEEK);
+            int dayAnt = cal.get(Calendar.DAY_OF_WEEK);
+            if(dayP!=dayAnt)
+                date = "Hier";
+
             return date;
         }
         if(currentTime-time>=(24*3600) & currentTime-time<=2*(24*3600)){

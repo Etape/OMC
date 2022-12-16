@@ -13,7 +13,8 @@
     <color name="yellow">#eaff01</color>
     <color name="yellow1">#d8e63e</color>
     <color name="grey">#464646</color>
-    <color name="grey2">#9c9c9c</color>
+    <color name="grey2">#d4d4d4</color>
+    <color name="grey3">#cacaca</color>
     <color name="grey_transparent">#8f464646</color>
     <color name="transparent">#00000000</color>
 </resources>

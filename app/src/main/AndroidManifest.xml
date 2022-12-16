@@ -60,7 +60,13 @@
             android:name=".Service_PatriotNotifications"
             android:exported="false" />
 
-        <activity android:name=".Activity_uploading"></activity>
+        <activity android:name=".Activity_uploading" />
+        <activity android:name=".Activity_competitive" />
+
+        <service
+            android:name=".Service_messaging"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

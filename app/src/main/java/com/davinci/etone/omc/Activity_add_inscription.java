@@ -367,8 +367,7 @@ public class Activity_add_inscription extends AppCompatActivity {
                                                 String key = refPre.push().getKey();
                                                 inscription.setId(key);
                                                 Calendar calendar=Calendar.getInstance();
-                                                inscription.setCreation_date(calendar
-                                                        .getTimeInMillis()/1000);
+                                                inscription.setCreation_date(calendar.getTimeInMillis()/1000);
                                                 refPre.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
@@ -422,6 +421,9 @@ public class Activity_add_inscription extends AppCompatActivity {
                                 }
                                 if (test) {
                                     String key = refPre.push().getKey();
+                                    inscription.setId(key);
+                                    Calendar calendar=Calendar.getInstance();
+                                    inscription.setCreation_date(calendar.getTimeInMillis()/1000);
                                     refPre.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
 
                                         @Override
@@ -478,10 +480,11 @@ public class Activity_add_inscription extends AppCompatActivity {
     }
     private long getTimestamp(String str_date){
         long timestamp = 0;
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         Date date = null;
         try {
             date = (Date)formatter.parse(str_date);
+            timestamp=date.getTime()/1000L;
         } catch (ParseException e) {
             e.printStackTrace();
         }

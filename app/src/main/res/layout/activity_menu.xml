@@ -170,6 +170,18 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/grey"/>
+        <TextView
+            android:id="@+id/deconnexion"
+            android:clickable="true"
+            android:textColor="@color/black"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Deconnexion"
+            android:padding="5dp"
+            android:textSize="18dp"
+            android:fontFamily="@font/aclonica"
+            android:gravity="center_vertical"
+            android:elevation="2dp"/>
     </LinearLayout>
 
 </RelativeLayout>
