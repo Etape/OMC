@@ -1,7 +1,8 @@
 package com.davinci.etone.omc;
 
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,6 +30,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -66,6 +73,14 @@ public class Activity_add_inscription extends AppCompatActivity {
     ArrayList<String> indicatifs=new ArrayList<>();
     ArrayList<Bv> allBv=new ArrayList<>();
     ArrayList<User> allUsers=new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    CollectionReference refPre = db.collection("Preinscription");
+    CollectionReference refIns = db.collection("Inscription");
+    CollectionReference refUser = db.collection("User");
+    CollectionReference refDisc = db.collection("Discussion");
+    CollectionReference refMes = db.collection("Message");
+    CollectionReference refBv = db.collection("Bv");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -334,41 +349,32 @@ public class Activity_add_inscription extends AppCompatActivity {
                     inscription.setNumero_ce(numero_ce.getText().toString());
                     inscription.setCni(cni.getText().toString());
                     but_create.setClickable(false);
-                    DatabaseReference refPre = Db.getReference().child("Inscription");
-                    DatabaseReference refUser = Db.getReference().child("User");
                     if (!parrain.getText().toString().isEmpty()) {
-                        refUser.addListenerForSingleValueEvent(new ValueEventListener() {
+                        refUser.whereEqualTo("code", parrain.getText().toString().trim()).limit(1).addSnapshotListener(new EventListener<QuerySnapshot>() {
                             @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                                 boolean test1 = false;
-                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    User user = snapshot.getValue(User.class);
-                                    if (user.getId().toUpperCase().equals(parrain.getText().toString().trim()
-                                            .toUpperCase())) {
+                                for (QueryDocumentSnapshot userD : userDocs) {
+                                    User user = map_user(userD);
                                         test1 = true;
-                                        break;
-                                    }
+
                                 }
                                 if (test1) {
                                     inscription.setParrain(parrain.getText().toString().trim());
-
-                                    refPre.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    refIns.whereEqualTo("numero_ce",inscription.getNumero_ce()).limit(1).addSnapshotListener(new EventListener<QuerySnapshot>() {
                                         @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                                             boolean test = true;
-                                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                                Inscription pre = snapshot.getValue(Inscription.class);
-                                                if (pre.getNumero_ce().equals(inscription.getNumero_ce())) {
-                                                    test = false;
-                                                    break;
-                                                }
+                                            for (QueryDocumentSnapshot insD : insDocs) {
+                                                Inscription pre = map_ins(insD);
+                                                test = false;
                                             }
                                             if (test) {
-                                                String key = refPre.push().getKey();
+                                                String key = refIns.document().getId();
                                                 inscription.setId(key);
                                                 Calendar calendar=Calendar.getInstance();
                                                 inscription.setCreation_date(calendar.getTimeInMillis()/1000);
-                                                refPre.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                refIns.document(key).set(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         Toast.makeText(Activity_add_inscription.this,
@@ -387,10 +393,6 @@ public class Activity_add_inscription extends AppCompatActivity {
                                             }
                                         }
 
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
                                     });
 
                                 } else {
@@ -400,31 +402,23 @@ public class Activity_add_inscription extends AppCompatActivity {
                                     progressBar.setVisibility(View.GONE);
                                 }
                             }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
                         });
                     }
                     else {
-                        refPre.addListenerForSingleValueEvent(new ValueEventListener() {
+                        refIns.addSnapshotListener(new EventListener<QuerySnapshot>() {
                             @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                                 boolean test = true;
-                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    Inscription pre = snapshot.getValue(Inscription.class);
-                                    if (pre.getNumero_ce().equals(inscription.getNumero_ce())) {
-                                        test = false;
-                                        break;
-                                    }
+                                for (QueryDocumentSnapshot insD : insDocs) {
+                                    Inscription pre = map_ins(insD);
+                                    test = false;
                                 }
                                 if (test) {
-                                    String key = refPre.push().getKey();
+                                    String key = refIns.document().getId();
                                     inscription.setId(key);
                                     Calendar calendar=Calendar.getInstance();
                                     inscription.setCreation_date(calendar.getTimeInMillis()/1000);
-                                    refPre.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    refIns.document(key).set(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
 
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -443,11 +437,6 @@ public class Activity_add_inscription extends AppCompatActivity {
                                     but_create.setClickable(true);
                                     progressBar.setVisibility(View.GONE);
                                 }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
                             }
                         });
                     }
@@ -537,5 +526,55 @@ public class Activity_add_inscription extends AppCompatActivity {
                 return true;
         }
         return false;
+    }
+    public User map_user(QueryDocumentSnapshot docU){
+        User user1=new User();
+        user1.id=docU.getString("id");
+        user1.cni=docU.getString("cni");
+        user1.activite= Math.toIntExact(docU.getLong("activite"));
+        user1.code=docU.getString("code");
+        user1.commune=docU.getString("commune");
+        user1.comite_base=docU.getString("comite_base");
+        user1.creation_date=docU.getLong("creation_date");
+        user1.date_naissance=docU.getString("date_naissance");
+        user1.departement=docU.getString("departement");
+        user1.departement_org=docU.getString("departement_org");
+        user1.email=docU.getString("email");
+        user1.matricule_parti=docU.getString("matricule_parti");
+        user1.nom=docU.getString("nom");
+        user1.parrain=docU.getString("parrain");
+        user1.pays=docU.getString("pays");
+        user1.parti=docU.getString("parti");
+        user1.password=docU.getString("password");
+        user1.region=docU.getString("region");
+        user1.prenom=docU.getString("prenom");
+        user1.sexe=docU.getString("sexe");
+        user1.sympatisant=docU.getString("sympatisant");
+        user1.type=docU.getString("type");
+        user1.sous_comite_arr=docU.getString("sous_comite_arr");
+        user1.telephone=docU.getString("telephone");
+        return user1;
+    }
+    public Inscription map_ins(QueryDocumentSnapshot insD){
+        Inscription ins = new Inscription();
+        ins.id = insD.getString("id");
+        ins.nom = insD.getString("nom");
+        ins.prenom = insD.getString("prenom");
+        ins.sexe = insD.getString("sexe");
+        ins.date_naissance = insD.getString("date_naissance");
+        ins.telephone = insD.getString("telephone");
+        ins.email = insD.getString("email");
+        ins.region = insD.getString("region");
+        ins.pays = insD.getString("pays");
+        ins.departement = insD.getString("departement");
+        ins.commune = insD.getString("commune");
+        ins.bv = insD.getString("bv");
+        ins.departement_org = insD.getString("departement_org");
+        ins.cni = insD.getString("cni");
+        ins.numero_ce = insD.getString("numero_ce");
+        ins.parrain = insD.getString("parrain");
+        ins.sympatisant = insD.getString("sympatisant");
+        ins.creation_date = insD.getLong("creation_date");
+        return ins;
     }
 }

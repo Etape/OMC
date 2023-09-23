@@ -2,33 +2,22 @@ package com.davinci.etone.omc;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Build;
-import android.os.Environment;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.system.Os;
 import android.text.Editable;
-import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -36,7 +25,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -46,9 +34,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aspose.cells.Workbook;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -57,15 +43,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.opencsv.CSVReader;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.smarteist.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType;
 import com.smarteist.autoimageslider.SliderAnimations;
 import com.smarteist.autoimageslider.SliderView;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
@@ -79,9 +67,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import static com.davinci.etone.omc.R.color.colorAccent;
-import static javax.xml.datatype.DatatypeConstants.DURATION;
-
 public class Activity_dashboard extends AppCompatActivity {
     ImageView home,tchat,occupancy,inscriptions,rh,but_homeMil,but_tchatMil,but_addInsMil,back,menu;
     User user;
@@ -93,7 +78,7 @@ public class Activity_dashboard extends AppCompatActivity {
             dashboard_occ_stat4,dashboard_ins_stat1,dashboard_ins_stat2,dashboard_ins_stat3,
             dashboard_ins_stat4;
     FirebaseUser Ui=auth.getCurrentUser();
-    TextView see_history,no_result_rh,no_result_occ,no_result_ins;
+    TextView see_history,no_result_rh,no_result_occ,no_result_ins,round_letter;
     LinearLayout filter,dashboard_rh_contain,dashboard_ins_contain,dashboard_occupancy_contain,bottomMenuMil;
     RelativeLayout dashboard,dashboard_rh,dashboard_occupancy,dashboard_tchat,
     dashboard_inscription,bottomMenu;
@@ -155,13 +140,13 @@ public class Activity_dashboard extends AppCompatActivity {
     ArrayList<Discussion> forums=new ArrayList<>();
     ArrayList<Discussion> privateDiscs=new ArrayList<>();
     ArrayList<Discussion> smsDiscs=new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     DisplayMetrics displayMetrics;
     int nbrePremois=0,nbrePrejour=0,nbreInsmois=0,nbreInsjour=0;
     Postes poste;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_dashboard);
         sexe.add("Homme");
         sexe.add("Femme");
@@ -183,6 +168,7 @@ public class Activity_dashboard extends AppCompatActivity {
         progressBar_create_disc=findViewById(R.id.progressBar_create_disc);
         new_disc_box=findViewById(R.id.new_disc_box);
 
+        round_letter=findViewById(R.id.round_letter);
         recylerViewMil=findViewById(R.id.recyclerviewMil);
         recylerViewBv=findViewById(R.id.recyclerviewBv);
         recylerViewIns=findViewById(R.id.recyclerviewIns);
@@ -400,42 +386,48 @@ public class Activity_dashboard extends AppCompatActivity {
         dashboard_inscription.setVisibility(View.GONE);
         progressBarLoading.setVisibility(View.VISIBLE);
 
-        String NOTIFICATION_CHANNEL_ID = "OMC_id_01";
-        NotificationCompat.Builder b = new NotificationCompat.Builder(Activity_dashboard.this, NOTIFICATION_CHANNEL_ID);
-        CharSequence name = "test";
-        String description = "OMC_Notification";
-        Intent intent=new Intent(Activity_dashboard.this,Activity_menu.class);
-        PendingIntent pendingIntent=PendingIntent.getActivity(Activity_dashboard.this,1,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationChannel mChannel;
-        b.setAutoCancel(true)
-                .setSmallIcon(R.drawable.logo_omc2_50)
-                .setContentTitle("Default notification")
-                .setPriority(Notification.PRIORITY_HIGH)
-                .setContentIntent(pendingIntent)
-                .setContentText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
-                .setDefaults(Notification.DEFAULT_LIGHTS| Notification.DEFAULT_SOUND);
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(Activity_dashboard.this);
-        notificationManager.notify(1, b.build());
-        Log.i("Notification"," Notification Played");
-
         pays=LoadCountries();
         LoadCommunes();
+        /*
         DatabaseReference refBv=Db.getReference().child("Bv");
         DatabaseReference refUs=Db.getReference().child("User");
         DatabaseReference refPre=Db.getReference().child("Preinscription");
         DatabaseReference refIns=Db.getReference().child("Inscription");
-        refBv.keepSynced(true);
-        refBv.addValueEventListener(new ValueEventListener() {
+        */
+        //loading user's datas ...
+        final CollectionReference refUs = db.collection("User");
+        final CollectionReference refBv = db.collection("Bv");
+        final CollectionReference refPre = db.collection("Preinscription");
+        final CollectionReference refIns = db.collection("Inscription");
+
+        refBv.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                allBv.clear();
-                Log.i("Firebase ","Firebase communes loading");
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Bv bv=postSnapshot.getValue(Bv.class);
-                    allBv.add(bv);
+            public void onEvent(@Nullable QuerySnapshot bvDocs, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.i("Firestore", "Listen failed.", e);
+                    return;
                 }
+                allBv.clear();
+                for(QueryDocumentSnapshot doc : bvDocs){
+                    Bv bv1=new Bv();
+                    bv1.bv_attente = Math.toIntExact(doc.getLong("bv_attente"));
+                    bv1.bv_recolte = Math.toIntExact(doc.getLong("bv_recolte"));
+                    bv1.bv_commune = doc.getString("bv_commune");
+                    bv1.bv_dep = doc.getString("bv_dep");
+                    bv1.bv_name = doc.getString("bv_name");
+                    bv1.bv_pays = doc.getString("bv_pays");
+                    bv1.bv_region = doc.getString("bv_region");
+                    bv1.bv_vol1_name = doc.getString("bv_vol1_name");
+                    bv1.bv_vol2_name = doc.getString("bv_vol2_name");
+                    bv1.bv_vol3_name = doc.getString("bv_vol3_name");
+                    bv1.bv_vol4_name = doc.getString("bv_vol4_name");
+                    bv1.bv_vol1_tel = doc.getString("bv_vol1_tel");
+                    bv1.bv_vol2_tel = doc.getString("bv_vol2_tel");
+                    bv1.bv_vol3_tel = doc.getString("bv_vol3_tel");
+                    bv1.bv_vol4_tel = doc.getString("bv_vol4_tel");
 
-
+                    allBv.add(bv1);
+                }
                 final int[] couverture = {0};
                 final int[] couvertureTotal = { allBv.size() };
                 for (int i=0;i<allBv.size();i++){
@@ -454,33 +446,82 @@ public class Activity_dashboard extends AppCompatActivity {
                         couverture[0]++;
                     }
                 }
-
-                refUs.orderByKey().addValueEventListener(new ValueEventListener() {
+                refUs.addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    public void onEvent(@Nullable QuerySnapshot userDocs, @Nullable FirebaseFirestoreException e) {
                         allUsers.clear();
                         allMil.clear();
                         millNames.clear();
                         Log.i("Firebase ","Firebase users loading");
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            User usr=postSnapshot.getValue(User.class);
-                            allUsers.add(usr);
-                            if(!usr.getType().equals("Citoyen") & !usr.getType().equals("citoyen") & !usr
-                                    .getEmail().equals(Ui.getEmail())){
-                                allMil.add(usr);
-                                millNames.add(usr.getNom()+" "+usr.getPrenom());
-                            }
-                            if(usr.getEmail().equals(Ui.getEmail())){
-                                user=usr;
-                                poste= new Postes(user.getType());
-                                Log.i("Firebase user type",user.getType());
-                                Log.i("Firebase categorie",poste.getCategorie());
+                        for(QueryDocumentSnapshot docU:userDocs){
+                            User user1=new User();
+                            try{
+                                String test=docU.getString("email");
+                                user1.id=docU.getString("id");
+                                user1.cni=docU.getString("cni");
+                                try {
+                                    user1.activite = Math.toIntExact(docU.getLong("activite"));
+                                }
+                                catch (Exception e1){
+                                    user1.activite=0;
+                                }
+                                user1.code=docU.getString("code");
+                                user1.commune=docU.getString("commune");
+                                user1.comite_base=docU.getString("comite_base");
+                                try {
+                                    user1.creation_date=docU.getLong("creation_date");
+                                }
+                                catch (Exception e1){
+                                    continue;
+                                }
+                                try {
+                                    user1.date_naissance = docU.getString("date_naissance");
+                                }
+                                catch (Exception e3){
+                                    user1.date_naissance = ""+docU.getLong("date_naissance");
+                                }
+                                user1.departement=docU.getString("departement");
+                                user1.departement_org=docU.getString("departement_org");
+                                user1.email=docU.getString("email");
+                                user1.matricule_parti=docU.getString("matricule_parti");
+                                user1.nom=docU.getString("nom");
+                                user1.parrain=docU.getString("parrain");
+                                user1.pays=docU.getString("pays");
+                                user1.parti=docU.getString("parti");
+                                user1.password=docU.getString("password");
+                                user1.region=docU.getString("region");
+                                user1.prenom=docU.getString("prenom");
+                                user1.sexe=docU.getString("sexe");
+                                user1.sympatisant=docU.getString("sympatisant");
+                                user1.type=docU.getString("type");
+                                user1.sous_comite_arr=docU.getString("sous_comite_arr");
+                                user1.telephone=docU.getString("telephone");
 
-                                if (poste.getCategorie().equals("C") | poste.getCategorie().equals("D")){
+                            }
+                            catch (Exception e4){
+                                user1.prenom=docU.getString("prenom");
+                                user1.nom=docU.getString("nom");
+                                user1.id=docU.getString("id");
+                                user1.type=docU.getString("type");
+
+                            }
+                            allUsers.add(user1);
+                            if(!user1.getType().equals("Citoyen") & !user1.getType().equals("citoyen") & !user1
+                                    .getEmail().equals(Ui.getEmail())){
+                                allMil.add(user1);
+                                millNames.add(user1.getNom()+" "+user1.getPrenom());
+                            }
+                            if(user1.getEmail().equals(Ui.getEmail())) {
+                                user = user1;
+                                round_letter.setText("" + user.getPrenom().toUpperCase().charAt(0));
+                                poste = new Postes(user.getType());
+                                Log.i("Firebase user type", user.getType());
+                                Log.i("Firebase categorie", poste.getCategorie());
+
+                                if (poste.getCategorie().equals("C") | poste.getCategorie().equals("D")) {
                                     bottomMenuMil.setVisibility(View.VISIBLE);
                                     bottomMenu.setVisibility(View.GONE);
-                                }
-                                else{
+                                } else {
                                     bottomMenu.setVisibility(View.VISIBLE);
                                     bottomMenuMil.setVisibility(View.GONE);
                                 }
@@ -492,9 +533,9 @@ public class Activity_dashboard extends AppCompatActivity {
                                 dashboard_inscription.setVisibility(View.GONE);
                                 progressBarLoading.setVisibility(View.GONE);
 
-                                refPre.orderByKey().addValueEventListener(new ValueEventListener() {
+                                refPre.addSnapshotListener(new EventListener<QuerySnapshot>() {
                                     @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    public void onEvent(@Nullable QuerySnapshot preDocs, @Nullable FirebaseFirestoreException e) {
                                         allPre.clear();
                                         preNames.clear();
                                         ArrayList<Commune> coms = new ArrayList<>();
@@ -504,11 +545,31 @@ public class Activity_dashboard extends AppCompatActivity {
                                         int nbre1819 = 0;
                                         int nbreDiaspo = 0;
                                         Log.i("Firebase ", "Firebase Preinscriptions loading");
-                                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                            Preinscription pre = postSnapshot.getValue(Preinscription.class);
+                                        for (QueryDocumentSnapshot preD : preDocs) {
+                                            Preinscription pre = new Preinscription();
+                                            pre.id = preD.getString("id");
+                                            pre.nom = preD.getString("nom");
+                                            pre.prenom = preD.getString("prenom");
+                                            pre.sexe = preD.getString("sexe");
+                                            pre.date_naissance = preD.getString("date_naissance");
+                                            pre.telephone = preD.getString("telephone");
+                                            pre.email = preD.getString("email");
+                                            pre.region = preD.getString("region");
+                                            pre.pays = preD.getString("pays");
+                                            pre.parti = preD.getString("parti");
+                                            pre.matricule_parti = preD.getString("matricule_parti");
+                                            pre.departement = preD.getString("departement");
+                                            pre.commune = preD.getString("commune");
+                                            pre.departement_org = preD.getString("departement_org");
+                                            pre.cni = preD.getString("cni");
+                                            pre.parrain = preD.getString("parrain");
+                                            pre.sympatisant = preD.getString("sympatisant");
+                                            pre.creation_date = preD.getLong("creation_date");
+
                                             allPre.add(pre);
                                             preNames.add(pre.getNom() + " " + pre.getPrenom());
                                         }
+
                                         for (int i = 0; i < allPre.size(); i++) {
                                             if (!filterZonePre(poste, allPre.get(i), user)) {
                                                 allPre.remove(i);
@@ -582,19 +643,45 @@ public class Activity_dashboard extends AppCompatActivity {
                                             }
 
                                         }
-                                        refIns.orderByKey().addValueEventListener(new ValueEventListener() {
+                                        refIns.addSnapshotListener(new EventListener<QuerySnapshot>() {
                                             @Override
-                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            public void onEvent(@Nullable QuerySnapshot insDocs, @Nullable FirebaseFirestoreException e) {
+
                                                 allIns.clear();
                                                 insNames.clear();
                                                 int nbreInsjour = 0;
                                                 int nbreInsmois = 0;
                                                 int nbreInsDiaspo = 0;
                                                 Log.i("Firebase ", "Firebase Inscriptions loading");
-                                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                                    Inscription ins = postSnapshot.getValue(Inscription.class);
+                                                for (QueryDocumentSnapshot insD : insDocs) {
+                                                    Inscription ins = new Inscription();
+                                                    ins.id = insD.getString("id");
+                                                    ins.nom = insD.getString("nom");
+                                                    ins.prenom = insD.getString("prenom");
+                                                    ins.sexe = insD.getString("sexe");
+                                                    ins.date_naissance = insD.getString("date_naissance");
+                                                    ins.telephone = insD.getString("telephone");
+                                                    ins.email = insD.getString("email");
+                                                    ins.region = insD.getString("region");
+                                                    ins.pays = insD.getString("pays");
+                                                    ins.departement = insD.getString("departement");
+                                                    ins.commune = insD.getString("commune");
+                                                    ins.bv = insD.getString("bv");
+                                                    ins.departement_org = insD.getString("departement_org");
+                                                    ins.cni = insD.getString("cni");
+                                                    ins.numero_ce = insD.getString("numero_ce");
+                                                    ins.parrain = insD.getString("parrain");
+                                                    ins.sympatisant = insD.getString("sympatisant");
+                                                    try {
+                                                        ins.creation_date = insD.getLong("creation_date");
+                                                    }
+                                                    catch (Exception e5){
+                                                        Log.i("Firestore log ", "inscId : "+ins.id);
+                                                        continue;
+                                                    }
                                                     allIns.add(ins);
                                                     insNames.add(ins.getNom() + " " + ins.getPrenom());
+
                                                 }
                                                 for (int i = 0; i < allIns.size(); i++) {
                                                     if (!filterZoneIns(poste, allIns.get(i), user)) {
@@ -686,15 +773,9 @@ public class Activity_dashboard extends AppCompatActivity {
                                                 if (nbreInsjour == 0) {
                                                     dashboard_stat4.setTextColor(ContextCompat.getColor(Activity_dashboard.this, R.color.red));
                                                 }
-
-
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
                                             }
                                         });
+
                                         dashboard_stat6.setText("" + nbreDiaspo);
                                         dashboard_stat5.setText("" + nbre1819);
                                         dashboard_ins_stat1.setText("" + nbrePremois);
@@ -719,14 +800,8 @@ public class Activity_dashboard extends AppCompatActivity {
                                         }
 
                                     }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                                    }
                                 });
-
                             }
-
                         }
 
                         for(int i=0;i<allUsers.size();i++){
@@ -744,70 +819,63 @@ public class Activity_dashboard extends AppCompatActivity {
                             auth.signOut();
                             finish();
                         }
-                        else{
+                        else {
                             viewHolderForum=new ViewHolderDiscussions(Activity_dashboard.this,forums,user.getId());
                             viewHolderSms=new ViewHolderDiscussions(Activity_dashboard.this,smsDiscs,user.getId());
                             viewHolderPrivate=new ViewHolderDiscussions(Activity_dashboard.this,privateDiscs,user.getId());
                             forum_recyclerview.setAdapter(viewHolderForum);
                             sms_recyclerview.setAdapter(viewHolderSms);
                             private_recyclerview.setAdapter(viewHolderPrivate);
-                            DatabaseReference refDisc=Db.getReference().child("Discussion");
-                            refDisc.orderByKey().addValueEventListener(new ValueEventListener() {
+                            CollectionReference refDisc = db.collection("Discussion");
+                            refDisc.addSnapshotListener(new EventListener<QuerySnapshot>() {
                                 @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                public void onEvent(@Nullable QuerySnapshot discDocs, @Nullable FirebaseFirestoreException e) {
                                     forums.clear();
                                     smsDiscs.clear();
                                     privateDiscs.clear();
-                                    for(DataSnapshot postSnapshot: dataSnapshot.getChildren()){
-                                        Discussion dis=postSnapshot.getValue(Discussion.class);
-                                        if (dis.getType().equals("forum")){
-                                            forums.add(dis);
+                                    for (QueryDocumentSnapshot discD:discDocs) {
+                                        Discussion dis=new Discussion();
+                                        dis.id=discD.getString("id");
+                                        dis.title=discD.getString("title");
+                                        dis.type=discD.getString("type");
+                                        try{
+                                            dis.last_message=discD.getString("last_message");
+                                            dis.last_writer=discD.getString("last_writer");
+                                            dis.last_date=discD.getLong("last_date");
+                                            dis.initiateur=discD.getString("initiateur");
+                                            dis.interlocuteur=discD.getString("interlocuteur");
                                         }
-                                        else if(dis.getType().equals("sms") & dis.getInitiateur().equals
-                                                (user.getId())){
+                                        catch (Exception e2){
+                                            continue;
+                                        }
+
+                                        if (dis.getType().equals("forum")){
+                                            if(dis.getId().length()<5 & !poste.getZone().equals("self") & !poste.getZone().equals("none")){
+                                                if(Integer.parseInt(dis.getId()) <= Integer.parseInt(poste.getZone()))
+                                                    forums.add(dis);
+                                            }
+                                            else if(dis.getId().length()>5 & ( dis.getInterlocuteur().contains(user.getId()) | dis.getInitiateur
+                                                    ().contains(user.getId()))){
+                                                forums.add(dis);
+                                            }
+                                        }
+                                        else if(dis.getType().equals("sms") & dis.getInitiateur().equals(user.getId())){
                                             smsDiscs.add(dis);
                                         }
-                                        else if(dis.getType().equals("tchat") &( dis.getInitiateur()
-                                                .equals(user.getId()) | dis.getInterlocuteur()
+                                        else if(dis.getType().equals("tchat") | dis.getType().equals("Tchat") &( dis.getInitiateur().equals(user
+                                                .getId()) | dis.getInterlocuteur()
                                                 .equals(user.getId()) )){
                                             privateDiscs.add(dis);
                                         }
                                     }
 
-                                    Log.i("fireBase ","Discussion count"+dataSnapshot.getChildrenCount());
-                                    for(int i=0;i<forums.size();i++){
-                                        if(poste.getZone().equals("commune") & forums.get(i).getId().length()<5 &  !forums.get(i).getType().equals("DEC")){
-                                            forums.remove(i);
-                                        }
-                                        else if(poste.getZone().equals("department") & forums.get(i).getId().length()<5 & !forums.get(i).getType().equals("DED") & !forums.get(i).getType()
-                                                .equals("DEC")){
-                                            forums.remove(i);
-                                        }
-                                        else if(poste.getZone().equals("region") & forums.get(i).getId().length()<5 & !forums.get(i).getType().equals("DER") & !forums.get(i).getType().equals("DED") & !forums.get(i).getType()
-                                                .equals("DEC")){
-                                            forums.remove(i);
-                                        }
-                                        else if(poste.getZone().equals("pays") & forums.get(i).getId().length()<5 & !forums.get(i).getType().equals("DEPays") & !forums.get(i).getType().equals("DER") & !forums.get(i).getType().equals("DED") & !forums.get(i).getType()
-                                                .equals("DEC")){
-                                            forums.remove(i);
-                                        }
-                                        else if(poste.getZone().equals("continent") & forums.get(i).getId().length()<5 & !forums.get(i).getType().equals
-                                                ("DECon")& !forums.get(i).getType().equals("DEPays") & !forums.get(i).getType().equals("DER") & !forums.get
-                                                (i).getType().equals("DED") & !forums.get(i).getType().equals("DEC")){
-                                            forums.remove(i);
-                                        }
-                                        else if(poste.getZone().equals("self") & forums.get(i).getId().length()<5){
-                                            forums.remove(i);
-                                        }
-                                        Log.i("Firebase","Forums "+forums.size());
-                                    }
+                                    Log.i("fireBase ","Discussion count"+discDocs.size());
+
+                                    Log.i("Firebase","Zone "+poste.getZone());
+                                    Log.i("Firebase","Forums "+forums.size());
                                     viewHolderPrivate.notifyDataSetChanged();
                                     viewHolderForum.notifyDataSetChanged();
                                     viewHolderSms.notifyDataSetChanged();
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                                 }
                             });
@@ -815,9 +883,6 @@ public class Activity_dashboard extends AppCompatActivity {
                         Log.i("Firebase ","Firebase users loaded");
                         Toast.makeText(Activity_dashboard.this, "Firebase Users loaded", Toast
                                 .LENGTH_SHORT).show();
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
                     }
                 });
@@ -826,10 +891,6 @@ public class Activity_dashboard extends AppCompatActivity {
                 Log.i("Firebase ","Firebase communes loaded");
                 Toast.makeText(Activity_dashboard.this, "Firebase communes loaded", Toast
                         .LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
@@ -1115,7 +1176,7 @@ public class Activity_dashboard extends AppCompatActivity {
                     User usr = allMil.get(i);
                     if(research_bar_rh.getText().toString().trim().equals("*")){
                         if (usr.getId().length()>4)
-                        ResultsMil.add(usr);
+                            ResultsMil.add(usr);
                     }
                     else  if (ifPassFilter(usr, filter1, research_bar_rh.getText().toString())) {
                         ResultsMil.add(usr);

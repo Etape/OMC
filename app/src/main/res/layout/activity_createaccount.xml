@@ -285,14 +285,40 @@
                 android:fontFamily="@font/aclonica"
                 android:textColor="@color/black"/>
             <EditText
-                android:id="@+id/date"
+                android:id="@+id/date_jour"
                 android:background="@drawable/editext_radius_white"
                 android:inputType="date"
                 android:paddingLeft="10dp"
-                android:layout_width="160dp"
+                android:layout_width="40dp"
                 android:layout_height="30dp"
-                android:hint="jj/mm/AAAA"
+                android:hint="JJ"
                 android:layout_marginLeft="5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/"
+                android:textSize="26dp"/>
+            <EditText
+                android:id="@+id/date_mois"
+                android:background="@drawable/editext_radius_white"
+                android:inputType="date"
+                android:paddingLeft="10dp"
+                android:layout_width="50dp"
+                android:layout_height="30dp"
+                android:hint="MM"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/"
+                android:textSize="26dp"/>
+            <EditText
+                android:id="@+id/date_annee"
+                android:background="@drawable/editext_radius_white"
+                android:inputType="date"
+                android:paddingLeft="10dp"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
+                android:hint="AAAA"/>
         </LinearLayout>
 
         <LinearLayout

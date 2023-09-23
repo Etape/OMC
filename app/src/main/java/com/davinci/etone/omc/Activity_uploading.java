@@ -1,12 +1,14 @@
 package com.davinci.etone.omc;
 
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,14 +25,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -48,6 +52,7 @@ public class Activity_uploading extends AppCompatActivity {
     private FirebaseDatabase Db=FirebaseDatabase.getInstance();
     ArrayList<Registration_failed> faileds=new ArrayList<>();
     ArrayList<Bv> bvs=new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     ArrayList<Preinscription> preinscriptions=new ArrayList<>();
     ArrayList<Inscription> inscriptions=new ArrayList<>();
     ViewHolderRegistration viewHolderRegistration;
@@ -76,69 +81,110 @@ public class Activity_uploading extends AppCompatActivity {
 
         progressBar.setVisibility(View.VISIBLE);
         page.setVisibility(View.GONE);
-        DatabaseReference refBv=Db.getReference().child("Bv");
-        refBv.keepSynced(true);
-        refBv.addValueEventListener(new ValueEventListener() {
+        final CollectionReference refUs = db.collection("User");
+        final CollectionReference refBv = db.collection("Bv");
+        final CollectionReference refPre = db.collection("Preinscription");
+        final CollectionReference refIns = db.collection("Inscription");
+        refBv.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                bvs.clear();
-                Log.i("Firebase ","Firebase Bvs loading");
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Bv bv=postSnapshot.getValue(Bv.class);
-                    bvs.add(bv);
+            public void onEvent(@Nullable QuerySnapshot bvDocs, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.i("Firestore", "Listen failed.", e);
+                    return;
                 }
-                Log.i("Firebase ","Firebase Bvs loaded");
-                Toast.makeText(Activity_uploading.this, "Firebase Bvs loaded", Toast
-                        .LENGTH_SHORT).show();
-                progressBar.setVisibility(View.GONE);
-                page.setVisibility(View.VISIBLE);
-            }
+                bvs.clear();
+                for(QueryDocumentSnapshot doc : bvDocs){
+                    Bv bv1=new Bv();
+                    bv1.bv_attente = Math.toIntExact(doc.getLong("bv_attente"));
+                    bv1.bv_recolte = Math.toIntExact(doc.getLong("bv_recolte"));
+                    bv1.bv_commune = doc.getString("bv_commune");
+                    bv1.bv_dep = doc.getString("bv_dep");
+                    bv1.bv_name = doc.getString("bv_name");
+                    bv1.bv_pays = doc.getString("bv_pays");
+                    bv1.bv_region = doc.getString("bv_region");
+                    bv1.bv_vol1_name = doc.getString("bv_vol1_name");
+                    bv1.bv_vol2_name = doc.getString("bv_vol2_name");
+                    bv1.bv_vol3_name = doc.getString("bv_vol3_name");
+                    bv1.bv_vol4_name = doc.getString("bv_vol4_name");
+                    bv1.bv_vol1_tel = doc.getString("bv_vol1_tel");
+                    bv1.bv_vol2_tel = doc.getString("bv_vol2_tel");
+                    bv1.bv_vol3_tel = doc.getString("bv_vol3_tel");
+                    bv1.bv_vol4_tel = doc.getString("bv_vol4_tel");
+                    bvs.add(bv1);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                    Log.i("Firebase ","Firebase Bvs loaded");
+                    Toast.makeText(Activity_uploading.this, "Firebase Bvs loaded", Toast
+                            .LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                    page.setVisibility(View.VISIBLE);
+                }
             }
         });
-        DatabaseReference refPre=Db.getReference().child("Preinscription");
-        DatabaseReference refIns=Db.getReference().child("Inscription");
 
-        refIns.addValueEventListener(new ValueEventListener() {
+        refIns.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onEvent(@Nullable QuerySnapshot insDocs, @Nullable FirebaseFirestoreException e) {
                 inscriptions.clear();
                 Log.i("Firebase ","Firebase inscriptions loading");
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Inscription bv=postSnapshot.getValue(Inscription.class);
-                    inscriptions.add(bv);
+                for (QueryDocumentSnapshot insD : insDocs) {
+                    Inscription ins = new Inscription();
+                    ins.id = insD.getString("id");
+                    ins.nom = insD.getString("nom");
+                    ins.prenom = insD.getString("prenom");
+                    ins.sexe = insD.getString("sexe");
+                    ins.date_naissance = insD.getString("date_naissance");
+                    ins.telephone = insD.getString("telephone");
+                    ins.email = insD.getString("email");
+                    ins.region = insD.getString("region");
+                    ins.pays = insD.getString("pays");
+                    ins.departement = insD.getString("departement");
+                    ins.commune = insD.getString("commune");
+                    ins.bv = insD.getString("bv");
+                    ins.departement_org = insD.getString("departement_org");
+                    ins.cni = insD.getString("cni");
+                    ins.numero_ce = insD.getString("numero_ce");
+                    ins.parrain = insD.getString("parrain");
+                    ins.sympatisant = insD.getString("sympatisant");
+                    ins.creation_date = insD.getLong("creation_date");
+
+                    inscriptions.add(ins);
                 }
                 Log.i("Firebase ","Firebase inscriptions loaded");
                 Toast.makeText(Activity_uploading.this, "Firebase inscriptions loaded", Toast
                         .LENGTH_SHORT).show();
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
         });
 
-        refPre.addValueEventListener(new ValueEventListener() {
+        refPre.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onEvent(@Nullable QuerySnapshot preDocs, @Nullable FirebaseFirestoreException e) {
                 preinscriptions.clear();
                 Log.i("Firebase ","Firebase preinscriptions loading");
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Preinscription bv=postSnapshot.getValue(Preinscription.class);
-                    preinscriptions.add(bv);
+                for (QueryDocumentSnapshot preD : preDocs) {
+                    Preinscription pre = new Preinscription();
+                    pre.id = preD.getString("id");
+                    pre.nom = preD.getString("nom");
+                    pre.prenom = preD.getString("prenom");
+                    pre.sexe = preD.getString("sexe");
+                    pre.date_naissance = preD.getString("date_naissance");
+                    pre.telephone = preD.getString("telephone");
+                    pre.email = preD.getString("email");
+                    pre.region = preD.getString("region");
+                    pre.pays = preD.getString("pays");
+                    pre.parti = preD.getString("parti");
+                    pre.matricule_parti = preD.getString("matricule_parti");
+                    pre.departement = preD.getString("departement");
+                    pre.commune = preD.getString("commune");
+                    pre.departement_org = preD.getString("departement_org");
+                    pre.cni = preD.getString("cni");
+                    pre.parrain = preD.getString("parrain");
+                    pre.sympatisant = preD.getString("sympatisant");
+                    pre.creation_date = preD.getLong("creation_date");
+                    preinscriptions.add(pre);
                 }
                 Log.i("Firebase ","Firebase preinscriptions loaded");
                 Toast.makeText(Activity_uploading.this, "Firebase preinscriptions loaded", Toast
                         .LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
 

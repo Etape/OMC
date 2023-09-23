@@ -271,7 +271,7 @@
                     android:layout_height="30dp"
                     android:layout_marginLeft="5dp"
                     android:background="@drawable/editext_radius_white"
-                    android:hint="AAAA/MM/JJ"
+                    android:hint="JJ/MM/AAAA"
                     android:inputType="date"
                     android:padding="5dp" />
             </LinearLayout>

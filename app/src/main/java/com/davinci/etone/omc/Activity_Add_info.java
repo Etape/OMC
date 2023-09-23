@@ -12,17 +12,17 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,18 +42,21 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class Activity_Add_info extends AppCompatActivity {
@@ -76,6 +79,14 @@ public class Activity_Add_info extends AppCompatActivity {
     private FirebaseDatabase Db=FirebaseDatabase.getInstance();
     ArrayList<Info> infos;
     ViewHolderHistoryInfos viewHolderHistoryInfos;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    CollectionReference refPre = db.collection("Preinscription");
+    CollectionReference refIns = db.collection("Inscription");
+    CollectionReference refUser = db.collection("User");
+    CollectionReference refDisc = db.collection("Discussion");
+    CollectionReference refHistory = db.collection("Info");
+    CollectionReference refBv = db.collection("Bv");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,18 +137,22 @@ public class Activity_Add_info extends AppCompatActivity {
             add_action_container.setVisibility(View.GONE);
             pageTitle.setText("Toutes les infos");
             ok.setVisibility(View.GONE);
-            DatabaseReference refHistory=Db.getReference().child("Info");
             Calendar  calendar=Calendar.getInstance();
             long currentTimestamp=calendar.getTimeInMillis()/1000;
             calendar.add(Calendar.DAY_OF_YEAR, -7);
             long OneWeekAgoTimestamp=calendar.getTimeInMillis()/1000;
             progressBar_history.setVisibility(View.VISIBLE);
-            refHistory.addValueEventListener(new ValueEventListener() {
+            refHistory.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot infoDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     infos.clear();
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        Info test = postSnapshot.getValue(Info.class);
+                    for (QueryDocumentSnapshot infoD : infoDocs) {
+                        Info test = new Info();
+                        test.image=infoD.getString("image");
+                        test.title=infoD.getString("title");
+                        test.path=infoD.getString("path");
+                        test.id=infoD.getString("id");
+                        test.time=infoD.getLong("time");
                         if(test.getTime()<currentTimestamp && test.getTime()>OneWeekAgoTimestamp ){
                             infos.add(test);
                         }
@@ -145,11 +160,6 @@ public class Activity_Add_info extends AppCompatActivity {
                     Log.i("History","History size:"+infos.size());
                     viewHolderHistoryInfos.notifyDataSetChanged();
                     progressBar_history.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
                 }
             });
         }
@@ -206,13 +216,11 @@ public class Activity_Add_info extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Uri> task) {
                                         info.setImage(task.getResult().toString());
-
                                         info.setTime(calendar.getTimeInMillis()/1000);
                                         Log.i("Images","Firestorage image Path : "+imagesRef
                                                 .getDownloadUrl().toString());
-                                        final DatabaseReference refLit=Db.getReference("Info");
-                                        final String Key=refLit.push().getKey();
-                                        refLit.child(Key).setValue(info).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        final String Key=refHistory.document().getId();
+                                        refHistory.document(Key).set(info).addOnCompleteListener(new OnCompleteListener<Void>() {
 
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -271,6 +279,12 @@ public class Activity_Add_info extends AppCompatActivity {
         });
     }
 
+    public String getDate(long time) {
+        java.util.Calendar cal = java.util.Calendar.getInstance(Locale.ENGLISH);
+        cal.setTimeInMillis(time * 1000);
+        String date = DateFormat.format("dd-MM-yyyy HH:mm", cal).toString();
+        return date;
+    }
     public void choosePicture( com.github.siyamed.shapeimageview.RoundedImageView image1){
         Intent intent =new Intent();
         intent.setType("image/*");
@@ -295,12 +309,6 @@ public class Activity_Add_info extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-    }
-    public String getDate(long time) {
-        java.util.Calendar cal = java.util.Calendar.getInstance(Locale.ENGLISH);
-        cal.setTimeInMillis(time * 1000);
-        String date = DateFormat.format("dd-MM-yyyy HH:mm", cal).toString();
-        return date;
     }
 
     public static String getPathFromUri(final Context context, final Uri uri) {

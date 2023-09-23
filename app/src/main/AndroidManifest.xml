@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.davinci.etone.omc">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -15,7 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:appComponentFactory">
-        <activity android:name=".Activity_launcher">
+        <activity android:name=".Activity_launcher"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,14 +23,16 @@
             </intent-filter>
         </activity>
         <activity android:name=".Activity_login" />
-        <activity android:name=".Activity_dashboard" />
+        <activity android:name=".Activity_dashboard"
+            android:launchMode="singleTask"/>
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
         <activity android:name=".Activity_createAccount" />
-        <activity android:name=".Activity_personnel" />
+        <activity android:name=".Activity_personnel"
+            android:launchMode="singleTask"/>
         <activity android:name=".Activity_bv" />
 
         <service
@@ -50,7 +52,8 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".Activity_tchat" />
+        <activity android:name=".Activity_tchat"
+            android:launchMode="singleTask"/>
         <activity android:name=".Activity_add_preinscription" />
         <activity android:name=".Activity_add_inscription" />
         <activity android:name=".Activity_menu" />

@@ -1,10 +1,8 @@
 package com.davinci.etone.omc;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,21 +23,21 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseException;
-import com.google.firebase.FirebaseTooManyRequestsException;
-import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthSettings;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.PhoneAuthCredential;
-import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,13 +48,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 public class Activity_createAccount extends AppCompatActivity {
     FirebaseAuth auth= FirebaseAuth.getInstance();
     private FirebaseDatabase Db=FirebaseDatabase.getInstance();
     ImageView back,upload_file;
-    EditText nom,prenom,email,telephone,cni,date,parrain,matricule,password,conf_password,code,sous_comite_arr,comite_base;
+    EditText nom,prenom,email,telephone,cni,date_jour,date_mois,date_annee,parrain,matricule,password,conf_password,code,sous_comite_arr,comite_base;
     AutoCompleteTextView militant,parti,region,departement,commune,pays,departement_org,indicatif;
     RadioButton sexe_homme,sexe_femme,symp_oui,symp_non;
     Button but_create,but_next;
@@ -76,6 +73,13 @@ public class Activity_createAccount extends AppCompatActivity {
     ArrayList<String[]> rdc=new ArrayList<>();
     ArrayList<String> payslist=new ArrayList<>();
     ArrayList<String> partis=new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    CollectionReference refPre = db.collection("Preinscription");
+    CollectionReference refUser = db.collection("User");
+    CollectionReference refDisc = db.collection("Discussion");
+    CollectionReference refMes = db.collection("Message");
+
     ArrayList<String> indicatifs=new ArrayList<>();
     ArrayList<User> allUsers=new ArrayList<>();
     @Override
@@ -101,8 +105,9 @@ public class Activity_createAccount extends AppCompatActivity {
         password=findViewById(R.id.password);
         conf_password=findViewById(R.id.conf_password);
         telephone=findViewById(R.id.telephone);
-        cni=findViewById(R.id.cni);
-        date=findViewById(R.id.date);
+        date_jour=findViewById(R.id.date_jour);
+        date_mois=findViewById(R.id.date_mois);
+        date_annee=findViewById(R.id.date_annee);
         parrain=findViewById(R.id.parrain);
         militant=findViewById(R.id.militant);
         parti=findViewById(R.id.parti);
@@ -377,7 +382,22 @@ public class Activity_createAccount extends AppCompatActivity {
                     error.setText("Veuillez renseigner votre commune !");
                     error.setVisibility(View.VISIBLE);
                 }
-                else if(date.getText().toString().isEmpty()){
+                else if(date_jour.getText().toString().isEmpty() | date_jour.getText().toString().length()>2 | Integer.parseInt(date_jour.getText()
+                        .toString())>31){
+                    error.setText("Veuillez renseigner une date correcte !");
+                    error.setVisibility(View.VISIBLE);
+                }
+                else if(date_mois.getText().toString().isEmpty() | date_mois.getText().toString().length()>2 | Integer.parseInt(date_mois.getText()
+                        .toString())>12){
+                    error.setText("Veuillez renseigner une date correcte !");
+                    error.setVisibility(View.VISIBLE);
+                }
+                else if(date_annee.getText().toString().isEmpty() | date_annee.getText().toString().length()!=4  | Integer.parseInt(date_annee.getText()
+                        .toString())>2010){
+                    error.setText("Veuillez renseigner une date correcte !");
+                    error.setVisibility(View.VISIBLE);
+                }
+                else if(getTimestamp(date_jour.getText().toString()+"/"+date_mois.getText().toString()+"/"+date_annee.getText().toString())==0){
                     error.setText("Veuillez renseigner une date correcte !");
                     error.setVisibility(View.VISIBLE);
                 }
@@ -396,14 +416,13 @@ public class Activity_createAccount extends AppCompatActivity {
                     error.setVisibility(View.VISIBLE);
                 }
                 else {
+                    String date= date_jour.getText().toString()+"/"+date_mois.getText().toString()+"/"+date_annee.getText().toString();
                     error.setVisibility(View.GONE);
                     progressBar.setVisibility(View.VISIBLE);
                     inscription.setNom(nom.getText().toString());
                     inscription.setPrenom(prenom.getText().toString());
-                    inscription.setTelephone(indicatif.getText().toString() + telephone.getText().toString
-                            ());
-                    if (getTimestamp(date.getText().toString()) != 0)
-                        inscription.setDate_naissance("" + getTimestamp(date.getText().toString()));
+                    inscription.setTelephone(indicatif.getText().toString() + telephone.getText().toString());
+                    inscription.setDate_naissance("" + getTimestamp(date));
                     if (sexe_homme.isChecked())
                         inscription.setSexe("Homme");
                     else
@@ -421,31 +440,49 @@ public class Activity_createAccount extends AppCompatActivity {
                     inscription.setDepartement_org(departement_org.getText().toString());
                     inscription.setCommune(commune.getText().toString());
                     but_create.setClickable(false);
-                    DatabaseReference refPre = Db.getReference().child("Preinscription");
-                    DatabaseReference refUser = Db.getReference().child("User");
                     if (!parrain.getText().toString().isEmpty()) {
                         final User[] parrainU = new User[1];
-                        refUser.addListenerForSingleValueEvent(new ValueEventListener() {
+                        refUser.whereEqualTo("code", parrain.getText().toString().trim()).limit(1).addSnapshotListener(new EventListener<QuerySnapshot>() {
                             @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                                 boolean test1 = false;
-                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    User user = snapshot.getValue(User.class);
-                                    if (user.getCode().equals(parrain.getText().toString().trim())) {
-                                        parrainU[0] =user;
-                                        test1 = true;
-                                        break;
-                                    }
+                                for (QueryDocumentSnapshot userD : userDocs) {
+                                    User user1 = new User();
+                                    user1.id=userD.getString("id");
+                                    user1.cni=userD.getString("cni");
+                                    user1.activite= Math.toIntExact(userD.getLong("activite"));
+                                    user1.code=userD.getString("code");
+                                    user1.commune=userD.getString("commune");
+                                    user1.comite_base=userD.getString("comite_base");
+                                    user1.creation_date=userD.getLong("creation_date");
+                                    user1.date_naissance=userD.getString("date_naissance");
+                                    user1.departement=userD.getString("departement");
+                                    user1.departement_org=userD.getString("departement_org");
+                                    user1.email=userD.getString("email");
+                                    user1.matricule_parti=userD.getString("matricule_parti");
+                                    user1.nom=userD.getString("nom");
+                                    user1.parrain=userD.getString("parrain");
+                                    user1.pays=userD.getString("pays");
+                                    user1.parti=userD.getString("parti");
+                                    user1.password=userD.getString("password");
+                                    user1.region=userD.getString("region");
+                                    user1.prenom=userD.getString("prenom");
+                                    user1.sexe=userD.getString("sexe");
+                                    user1.sympatisant=userD.getString("sympatisant");
+                                    user1.type=userD.getString("type");
+                                    user1.sous_comite_arr=userD.getString("sous_comite_arr");
+                                    user1.telephone=userD.getString("telephone");
+
+                                    parrainU[0] =user1;
+                                    test1 = true;
                                 }
                                 if (test1) {
                                     inscription.setParrain(parrainU[0].getId());
-                                        String key = refUser.push().getKey();
-                                        inscription.setId(key);
                                         Calendar calendar=Calendar.getInstance();
                                         inscription.setCreation_date(calendar.getTimeInMillis()/1000);
-                                        refUser.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        refUser.add(inscription).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                                             @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
+                                            public void onComplete(@NonNull Task<DocumentReference> task) {
                                                 Log.i("Firebase","user created");
                                                 finish();
                                             }
@@ -465,224 +502,233 @@ public class Activity_createAccount extends AppCompatActivity {
                                     progressBar.setVisibility(View.GONE);
                                 }
                             }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
                         });
                     }
                     else {
-                        refUser.addListenerForSingleValueEvent(new ValueEventListener() {
+                        refUser.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                             @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                 boolean test = true;
                                 allUsers.clear();
-                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    User pre = snapshot.getValue(User.class);
-                                    allUsers.add(pre);
-                                    if (pre.getEmail().equals(inscription.getEmail())) {
-                                        test = false;
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot userD : task.getResult()) {
+                                        User user1 = new User();
+                                        user1.id = userD.getString("id");
+                                        user1.cni = userD.getString("cni");
+                                        user1.activite = Math.toIntExact(userD.getLong("activite"));
+                                        user1.code = userD.getString("code");
+                                        user1.commune = userD.getString("commune");
+                                        user1.comite_base = userD.getString("comite_base");
+                                        user1.creation_date = userD.getLong("creation_date");
+                                        user1.date_naissance = userD.getString("date_naissance");
+                                        user1.departement = userD.getString("departement");
+                                        user1.departement_org = userD.getString("departement_org");
+                                        user1.email = userD.getString("email");
+                                        user1.matricule_parti = userD.getString("matricule_parti");
+                                        user1.nom = userD.getString("nom");
+                                        user1.parrain = userD.getString("parrain");
+                                        user1.pays = userD.getString("pays");
+                                        user1.parti = userD.getString("parti");
+                                        user1.password = userD.getString("password");
+                                        user1.region = userD.getString("region");
+                                        user1.prenom = userD.getString("prenom");
+                                        user1.sexe = userD.getString("sexe");
+                                        user1.sympatisant = userD.getString("sympatisant");
+                                        user1.type = userD.getString("type");
+                                        user1.sous_comite_arr = userD.getString("sous_comite_arr");
+                                        user1.telephone = userD.getString("telephone");
+                                        allUsers.add(user1);
+                                        if (user1.getEmail().equals(inscription.getEmail())) {
+                                            test = false;
+                                        }
                                     }
-
-                                }
-                                if (test) {
-                                    String key = refPre.push().getKey();
-                                    inscription.setId(key);
-                                    Calendar calendar=Calendar.getInstance();
-                                    inscription.setCreation_date(calendar
-                                            .getTimeInMillis()/1000);
-                                    Log.i("Firebase","Creating user authentication");dialogBox.setVisibility(View.VISIBLE);
-                                    progressBar.setVisibility(View.GONE);
-                                    if (militant.getText().toString().trim().toUpperCase().equals("OUI") & parti
-                                            .getText().toString().equals("PCRN")){
+                                    if (test) {
+                                        String key = refPre.document().getId();
+                                        inscription.setId(key);
+                                        Calendar calendar = Calendar.getInstance();
+                                        inscription.setCreation_date(calendar.getTimeInMillis() / 1000);
+                                        Log.i("Firebase", "Creating user authentication");
                                         dialogBox.setVisibility(View.VISIBLE);
-                                        ok_but.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                Log.i("Firebase","User authenticaticated");
-                                                boolean accept=true;
-                                                if(dialogBox.getVisibility()==View.VISIBLE){
-                                                    if (comite_base.getText().toString().isEmpty() ){
-                                                        comite_base.setBackgroundResource(R.color.red);
-                                                        accept=false;
+                                        progressBar.setVisibility(View.GONE);
+                                        if (militant.getText().toString().trim().toUpperCase().equals("OUI") & parti.getText().toString().equals("PCRN")) {
+                                            dialogBox.setVisibility(View.VISIBLE);
+                                            ok_but.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+                                                    Log.i("Firebase", "User authenticaticated");
+                                                    boolean accept = true;
+                                                    if (dialogBox.getVisibility() == View.VISIBLE) {
+                                                        if (comite_base.getText().toString().isEmpty()) {
+                                                            comite_base.setBackgroundResource(R.color.red);
+                                                            accept = false;
+                                                        } else if (sous_comite_arr.getText().toString().isEmpty()) {
+                                                            sous_comite_arr.setBackgroundResource(R.color.red);
+                                                            accept = false;
+                                                        } else if (code.getText().toString().isEmpty() | code.getText()
+                                                                .toString().length() != 8) {
+                                                            sous_comite_arr.setBackgroundResource(R.color.red);
+                                                            accept = false;
+                                                        } else {
+                                                            inscription.setComite_base(comite_base.getText().toString().toUpperCase());
+                                                            inscription.setCni(code.getText().toString().toUpperCase
+                                                                    ());
+                                                            inscription.setSous_comite_arr(sous_comite_arr.getText().toString().toUpperCase());
+                                                            accept = true;
+                                                        }
                                                     }
-                                                    else if(sous_comite_arr.getText().toString().isEmpty()){
-                                                        sous_comite_arr.setBackgroundResource(R.color.red);
-                                                        accept=false;
-                                                    }
-                                                    else if(code.getText().toString().isEmpty() | code.getText()
-                                                            .toString().length()!=8){
-                                                        sous_comite_arr.setBackgroundResource(R.color.red);
-                                                        accept=false;
-                                                    }
-                                                    else{
-                                                        inscription.setComite_base(comite_base.getText().toString().toUpperCase());
-                                                        inscription.setCni(code.getText().toString().toUpperCase
-                                                                ());
-                                                        inscription.setSous_comite_arr(sous_comite_arr.getText().toString().toUpperCase());
-                                                        accept=true;
-                                                    }
-                                                }
-                                                if(accept){
-                                                    inscription.setType("Citoyen");
-                                                    progressBar.setVisibility(View.VISIBLE);
-                                                    refUser.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            dialogBox.setVisibility(View.GONE);
-                                                            progressBar.setVisibility(View.GONE);
+                                                    if (accept) {
+                                                        inscription.setType("Citoyen");
+                                                        progressBar.setVisibility(View.VISIBLE);
+                                                        refUser.document(key).set(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                dialogBox.setVisibility(View.GONE);
+                                                                progressBar.setVisibility(View.GONE);
+                                                                Log.i("Firebase", "sending messages for Militant");
+                                                                if (militant.getText().toString().toUpperCase().trim().equals
+                                                                        ("OUI") & parti.getText().toString().equals("PCRN")) {
+                                                                    Message message = new Message();
+                                                                    message.setRecepteur(inscription.getId());
+                                                                    message.setEmetteur("0");
+                                                                    message.setContenu("Bienvenu dans l'univers OMC, vos " +
+                                                                            "informations sont en cours de verification");
+                                                                    message.setDate_envoi(System.currentTimeMillis() / 1000);
+                                                                    String disc_id = refDisc.document().getId();
+                                                                    String key = refMes.document().getId();
+                                                                    message.setDisc_id(disc_id);
+                                                                    message.setId(key);
+                                                                    refMes.document(key).set(message);
 
-                                                            Log.i("Firebase","sending messages for Militant");
-                                                            if (militant.getText().toString().toUpperCase().trim().equals
-                                                                    ("OUI") & parti.getText().toString().equals("PCRN")){
-                                                                Message message =new Message();
-                                                                message.setRecepteur(inscription.getId());
-                                                                message.setEmetteur("0");
-                                                                message.setContenu("Bienvenu dans l'univers OMC, vos " +
-                                                                        "informations sont en cours de verification");
-                                                                message.setDate_envoi(System.currentTimeMillis()/1000);
-                                                                DatabaseReference refDisc=Db.getReference().child("Discussion");
-                                                                DatabaseReference refMes=Db.getReference().child("Message");
-                                                                String disc_id=refDisc.push().getKey();
-                                                                String key=refMes.push().getKey();
-                                                                message.setDisc_id(disc_id);
-                                                                message.setId(key);
-                                                                refMes.child(key).setValue(message);
-
-                                                                Discussion discussion=new Discussion();
-                                                                discussion.setInitiateur("0");
-                                                                discussion.setInterlocuteur(inscription.getId());
-                                                                discussion.setTitle("Message Systeme");
-                                                                discussion.setType("Tchat");
-                                                                discussion.setId(disc_id);
-                                                                discussion.setLast_writer("0");
-                                                                discussion.setLast_message(message.getContenu());
-                                                                discussion.setLast_date(message.getDate_envoi());
-                                                                refDisc.child(disc_id).setValue(discussion).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                        boolean found=false;
-                                                                        for (int i=0;i<allUsers.size();i++){
-                                                                            if (allUsers.get(i).getCommune().equals(inscription.getCommune()) &
-                                                                                    allUsers.get(i).getType()
-                                                                                            .equals("SG CA")){
-                                                                                receiver=allUsers.get(i).getId();
-                                                                                found=true;
-                                                                                break;
+                                                                    Discussion discussion = new Discussion();
+                                                                    discussion.setInitiateur("0");
+                                                                    discussion.setInterlocuteur(inscription.getId());
+                                                                    discussion.setTitle("Message Systeme");
+                                                                    discussion.setType("Tchat");
+                                                                    discussion.setId(disc_id);
+                                                                    discussion.setLast_writer("0");
+                                                                    discussion.setLast_message(message.getContenu());
+                                                                    discussion.setLast_date(message.getDate_envoi());
+                                                                    refDisc.document(disc_id).set(discussion).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                            boolean found = false;
+                                                                            for (int i = 0; i < allUsers.size(); i++) {
+                                                                                if (allUsers.get(i).getCommune().equals(inscription.getCommune()) &
+                                                                                        allUsers.get(i).getType()
+                                                                                                .equals("SG CA")) {
+                                                                                    receiver = allUsers.get(i).getId();
+                                                                                    found = true;
+                                                                                    break;
+                                                                                }
                                                                             }
-                                                                        }
-                                                                        if (!found){
-                                                                            receiver="-NDodudaW-J1USWvHkpB";
-                                                                        }
+                                                                            if (!found) {
+                                                                                receiver = "-NDodudaW-J1USWvHkpB";
+                                                                            }
 
-                                                                        Message message =new Message();
-                                                                        message.setRecepteur(receiver);
-                                                                        message.setEmetteur("0");
-                                                                        String contenu="Validation de Militant " +
-                                                                                "\n Id :"+ inscription.getId();
-                                                                        message.setContenu(contenu);
-                                                                        message.setDate_envoi(System.currentTimeMillis()/1000);
-                                                                        DatabaseReference refDisc=Db.getReference().child("Discussion");
-                                                                        DatabaseReference refMes=Db.getReference().child("Message");
-                                                                        String key=refMes.push().getKey();
-                                                                        message.setId(key);
-                                                                        refDisc.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                            @Override
-                                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                                                                    Discussion disc = snapshot.getValue
-                                                                                            (Discussion.class);
-                                                                                    if (disc.getInitiateur().equals
-                                                                                            ("0") & disc
-                                                                                            .getInterlocuteur().equals
-                                                                                                    (receiver) ) {
-                                                                                        discussionAd=disc;
-                                                                                        break;
+                                                                            Message message = new Message();
+                                                                            message.setRecepteur(receiver);
+                                                                            message.setEmetteur("0");
+                                                                            String contenu = "Validation de Militant " +
+                                                                                    "\n Id :" + inscription.getId();
+                                                                            message.setContenu(contenu);
+                                                                            message.setDate_envoi(System.currentTimeMillis() / 1000);
+                                                                            String key = refMes.document().getId();
+                                                                            message.setId(key);
+                                                                            refDisc.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                                                                @Override
+                                                                                public void onEvent(@javax.annotation.Nullable QuerySnapshot discDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                                                                                    for (QueryDocumentSnapshot discD : discDocs) {
+                                                                                        Discussion disc = new Discussion();
+
+                                                                                        disc.id=discD.getString("id");
+                                                                                        disc.title=discD.getString("title");
+                                                                                        disc.type=discD.getString("type");
+                                                                                        disc.initiateur=discD.getString("initiateur");
+                                                                                        disc.interlocuteur=discD.getString("interlocuteur");
+                                                                                        disc.last_date=discD.getLong("last_date");
+                                                                                        disc.last_message=discD.getString("last_message");
+                                                                                        disc.last_writer=discD.getString("last_writer");
+                                                                                        if (disc.getInitiateur().equals
+                                                                                                ("0") & disc
+                                                                                                .getInterlocuteur().equals
+                                                                                                        (receiver)) {
+                                                                                            discussionAd = disc;
+                                                                                            break;
+                                                                                        }
                                                                                     }
-                                                                                }
-                                                                                if(discussionAd==null){
-                                                                                    discussionAd=new Discussion();
-                                                                                    discussionAd.setInitiateur("0");
-                                                                                    discussionAd.setInterlocuteur
-                                                                                            (receiver);
-                                                                                    discussionAd.setTitle("Message Systeme");
-                                                                                    discussionAd.setType("Tchat");
-                                                                                    discussionAd.setLast_writer("0");
-                                                                                    discussionAd.setLast_message(message.getContenu());
-                                                                                    discussionAd.setLast_date(message.getDate_envoi());
-                                                                                    String disc_id=refDisc.push().getKey();
-                                                                                    message.setDisc_id(disc_id);
-                                                                                    discussionAd.setId(disc_id);
-                                                                                    refDisc.child(disc_id).setValue
-                                                                                            (discussionAd);
-                                                                                    finish();
-                                                                                }
-                                                                                else{
-                                                                                    String disc_id=discussionAd.getId();
-                                                                                    message.setDisc_id(disc_id);
-                                                                                    discussionAd.setLast_message(message.getContenu());
-                                                                                    discussionAd.setLast_date(message.getDate_envoi());
-                                                                                    refDisc.child(disc_id).setValue(discussionAd);
-                                                                                    finish();
+                                                                                    if (discussionAd == null) {
+                                                                                        discussionAd = new Discussion();
+                                                                                        discussionAd.setInitiateur("0");
+                                                                                        discussionAd.setInterlocuteur
+                                                                                                (receiver);
+                                                                                        discussionAd.setTitle("Message Systeme");
+                                                                                        discussionAd.setType("Tchat");
+                                                                                        discussionAd.setLast_writer("0");
+                                                                                        discussionAd.setLast_message(message.getContenu());
+                                                                                        discussionAd.setLast_date(message.getDate_envoi());
+                                                                                        String disc_id = refDisc.document().getId();
+                                                                                        message.setDisc_id(disc_id);
+                                                                                        discussionAd.setId(disc_id);
+                                                                                        refDisc.document(disc_id).set(discussionAd);
+                                                                                        finish();
+                                                                                    } else {
+                                                                                        String disc_id = discussionAd.getId();
+                                                                                        message.setDisc_id(disc_id);
+                                                                                        discussionAd.setLast_message(message.getContenu());
+                                                                                        discussionAd.setLast_date(message.getDate_envoi());
+                                                                                        refDisc.document(disc_id).set(discussionAd);
+                                                                                        finish();
+                                                                                    }
+
+                                                                                    refMes.document(key).set(message);
+
                                                                                 }
 
-                                                                                refMes.child(key).setValue(message);
-
-                                                                            }
-                                                                            @Override
-                                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                }).addOnFailureListener(new OnFailureListener() {
-                                                                    @Override
-                                                                    public void onFailure(@NonNull Exception e) {
-                                                                        but_create.setClickable(true);
-                                                                        error.setText("Oups!!!  Probleme de connexion");
-                                                                        error.setVisibility(View.VISIBLE);
-                                                                    }
-                                                                });
+                                                                            });
+                                                                        }
+                                                                    }).addOnFailureListener(new OnFailureListener() {
+                                                                        @Override
+                                                                        public void onFailure(@NonNull Exception e) {
+                                                                            but_create.setClickable(true);
+                                                                            error.setText("Oups!!!  Probleme de connexion");
+                                                                            error.setVisibility(View.VISIBLE);
+                                                                        }
+                                                                    });
+                                                                }
                                                             }
-                                                        }
-                                                    }).addOnFailureListener(new OnFailureListener() {
-                                                        @Override
-                                                        public void onFailure(@NonNull Exception e) {
-                                                            but_create.setClickable(true);
-                                                            error.setText("Oups!!!  Probleme de connexion");
-                                                            error.setVisibility(View.VISIBLE);
-                                                        }
-                                                    });
+                                                        }).addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                but_create.setClickable(true);
+                                                                error.setText("Oups!!!  Probleme de connexion");
+                                                                error.setVisibility(View.VISIBLE);
+                                                            }
+                                                        });
+                                                    }
                                                 }
+                                            });
+                                        } else {
+                                            dialogBox.setVisibility(View.GONE);
+                                            Log.i("Firebase", "creating user authentication");
+                                            refUser.document(key).set(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    Log.i("Firebase", "user created");
+                                                    finish();
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    but_create.setClickable(true);
+                                                    error.setText("Oups!!!  Probleme de connexion");
+                                                    error.setVisibility(View.VISIBLE);
+                                                }
+                                            });
                                         }
-                                    });
+                                    }
                                 }
-                                else {
-                                    dialogBox.setVisibility(View.GONE);
-                                    Log.i("Firebase","creating user authentication");
-                                    refUser.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            Log.i("Firebase","user created");
-                                            finish();
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            but_create.setClickable(true);
-                                            error.setText("Oups!!!  Probleme de connexion");
-                                            error.setVisibility(View.VISIBLE);
-                                        }
-                                    });
-                                }
-                            }
                             }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
                         });
                     }
                 }

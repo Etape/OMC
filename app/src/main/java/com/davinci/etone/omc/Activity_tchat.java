@@ -1,14 +1,14 @@
 package com.davinci.etone.omc;
 
-import android.content.Intent;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PagerSnapHelper;
-import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +29,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,7 +46,6 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 public class Activity_tchat extends AppCompatActivity {
@@ -55,7 +63,10 @@ public class Activity_tchat extends AppCompatActivity {
     RecyclerView messages_recyclerview;
     TextView initials,disc_title,message_content,text_mois;
     FirebaseDatabase Db=FirebaseDatabase.getInstance();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    CollectionReference refDisc = db.collection("Discussion");
+    CollectionReference refMes = db.collection("Message");
     ArrayList<String> communes=new ArrayList<>();
     ArrayList<String> regions=new ArrayList<>();
     ArrayList<String> sexe=new ArrayList<>();
@@ -130,12 +141,13 @@ public class Activity_tchat extends AppCompatActivity {
     String destinataire;
     String entete_msg;
     String bas_msg;
+    DisplayMetrics displayMetrics;
     String disc_id,type;
+    ListenerRegistration messageEventListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tchat);
-
         main=findViewById(R.id.main);
         plus=findViewById(R.id.plus);
         send=findViewById(R.id.send);
@@ -152,9 +164,9 @@ public class Activity_tchat extends AppCompatActivity {
         message=findViewById(R.id.message);
         write_bar=findViewById(R.id.write_bar);
 
-         destinataire="";
-         entete_msg=entete.getText().toString();
-         bas_msg=bas_message.getText().toString();
+        destinataire="";
+        entete_msg=entete.getText().toString();
+        bas_msg=bas_message.getText().toString();
 
         initials=findViewById(R.id.initials);
         disc_title=findViewById(R.id.disc_title);
@@ -163,6 +175,22 @@ public class Activity_tchat extends AppCompatActivity {
         message_content=findViewById(R.id.message_content);
         text_mois=findViewById(R.id.text_mois);
 
+        displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        int height = displayMetrics.heightPixels-480;
+        if(displayMetrics.heightPixels<=1300){
+            height=displayMetrics.heightPixels-290;
+        }
+        if(displayMetrics.heightPixels>1300 & displayMetrics.heightPixels<1700){
+            height=displayMetrics.heightPixels-230;
+        }
+        int width = displayMetrics.widthPixels;
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
+        params.addRule(RelativeLayout.BELOW,R.id.baner);
+
+        scroll_forum.setLayoutParams(params);
         messages_recyclerview.setHasFixedSize(true);
         messages_recyclerview.setLayoutManager(new LinearLayoutManager(this));
         destinataire="";
@@ -171,13 +199,18 @@ public class Activity_tchat extends AppCompatActivity {
         type=getIntent().getStringExtra("type");
         disc_id=getIntent().getStringExtra("Id_disc");
         final String user_id=getIntent().getStringExtra("user_id");
+        final String inter_id=getIntent().getStringExtra("inter_id");
         final String disc_tit=getIntent().getStringExtra("disc_title");
 
+        if (inter_id!=null & inter_id.equals("0")){
+            write_bar.setVisibility(View.GONE);
+        }
         if(type!=null & (type.equals("forum") | type.equals("tchat"))) {
             tchat_menu.setVisibility(View.GONE);
         }
-        Log.i("Firebage","disc_id ="+disc_id);
+        Log.i("Firebase","disc_id ="+disc_id);
 
+        Log.i("Messagery","Interlocutor id " + inter_id);
         text_mois.setVisibility(View.GONE);
         disc_title.setText(disc_tit.split(" ")[0]);
         String initial=""+disc_tit.charAt(0)+""+disc_tit.charAt(1);
@@ -203,23 +236,31 @@ public class Activity_tchat extends AppCompatActivity {
                         scroll_forum.setVisibility(View.GONE);
                         String message_contain= entete_msg+"\n"+message.getText().toString()+"\n"+bas_msg;
                         message_content.setText(message_contain);
-
                     }
                     else{
                         Message mes=new Message();
                         mes.setContenu(message.getText().toString());
                         mes.setEmetteur(user_id);
                         mes.setDisc_id(disc_id);
+                        if (inter_id!=null)
+                            mes.setRecepteur(inter_id);
+                        Log.i("Messagery","Interlocutor id " + mes.getRecepteur() + " sender id "+mes.getEmetteur());
                         mes.setDate_envoi(System.currentTimeMillis()/1000);
-                        DatabaseReference refDisc=Db.getReference().child("Discussion");
-                        DatabaseReference refMes=Db.getReference().child("Message");
-                        String key=refMes.push().getKey();
+                        String key=refMes.document().getId();
                         mes.setId(key);
-                        refMes.child(key).setValue(mes);
-                        refDisc.child(disc_id).child("last_message").setValue(mes.getContenu());
-                        refDisc.child(disc_id).child("last_writer").setValue(user_id);
-                        refDisc.child(disc_id).child("last_date").setValue(mes.getDate_envoi());
+                        refMes.document(key).set(mes).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()){
+                                    refDisc.document(disc_id).update("last_message",mes.getContenu());
+                                    refDisc.document(disc_id).update("last_writer",user_id);
+                                    refDisc.document(disc_id).update("last_date",mes.getDate_envoi());
+                                }
+                            }
+                        });
                         message.setText("");
+                        scroll_forum.fullScroll(ScrollView.FOCUS_DOWN);
+                        scroll_forum.scrollTo(0, scroll_forum.getBottom());
                     }
                 }
             }
@@ -245,14 +286,18 @@ public class Activity_tchat extends AppCompatActivity {
                 mes.setDisc_id(disc_id);
                 mes.setRecepteur(destinataire);
                 mes.setDate_envoi(System.currentTimeMillis()/1000);
-                DatabaseReference refDisc=Db.getReference().child("Discussion");
-                DatabaseReference refMes=Db.getReference().child("Message");
-                String key=refMes.push().getKey();
+                String key=refMes.document().getId();
                 mes.setId(key);
-                refMes.child(key).setValue(mes);
-                refDisc.child(disc_id).child("last_message").setValue(mes.getContenu());
-                refDisc.child(disc_id).child("last_writer").setValue(user_id);
-                refDisc.child(disc_id).child("last_date").setValue(mes.getDate_envoi());
+                refMes.document(key).set(mes).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()){
+                            refDisc.document(disc_id).update("last_message",mes.getContenu());
+                            refDisc.document(disc_id).update("last_writer",user_id);
+                            refDisc.document(disc_id).update("last_date",mes.getDate_envoi());
+                        }
+                    }
+                });
                 message.setText("");
                 scroll_sms.setVisibility(View.GONE);
                 scroll_forum.setVisibility(View.VISIBLE);
@@ -264,25 +309,31 @@ public class Activity_tchat extends AppCompatActivity {
         else if(type.equals("forum")){
             main.setBackgroundResource(R.drawable.discussion_wallpaper4);
         }
-        DatabaseReference refMessages= Db.getReference().child("Message");
-        refMessages.orderByKey().addValueEventListener(new ValueEventListener() {
+        messageEventListener=refMes.whereEqualTo("disc_id", disc_id).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onEvent(@javax.annotation.Nullable QuerySnapshot mesDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                 messages.clear();
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Message mes=postSnapshot.getValue(Message.class);
-                    if(mes.getDisc_id().equals(disc_id)){
-                        messages.add(mes);
+                for (QueryDocumentSnapshot mesD : mesDocs) {
+                    Message mes=new Message();
+                    mes.emetteur=mesD.getString("emetteur");
+                    mes.recepteur=mesD.getString("recepteur");
+                    mes.contenu=mesD.getString("contenu");
+                    mes.disc_id=mesD.getString("disc_id");
+                    mes.etat=mesD.getString("etat");
+                    mes.id=mesD.getId();
+                    mes.date_envoi=mesD.getLong("date_envoi");
+                    messages.add(mes);
+                    if(mes.getEtat().equals("non lu") & !mes.getEmetteur().equals(user_id)){
+                        refMes.document(mes.id).update("etat","lu");
                     }
+
                 }
                 viewHolderMessages.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
+
         });
+
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -308,7 +359,6 @@ public class Activity_tchat extends AppCompatActivity {
                 }
             }
         });
-
         messages_recyclerview.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -327,6 +377,18 @@ public class Activity_tchat extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        if(messages.size()==0 ){
+            if(disc_id!=null & disc_id.length()>2){
+                refDisc.document(disc_id).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        messageEventListener.remove();
+                        Toast.makeText(Activity_tchat.this, "messageEventListener Removed", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                });
+            }
+        }
         if (scroll_settings.getVisibility()==View.VISIBLE){
             write_bar.setVisibility(View.VISIBLE);
             if(message.getText().toString().isEmpty()){
@@ -346,23 +408,18 @@ public class Activity_tchat extends AppCompatActivity {
             scroll_sms.setVisibility(View.GONE);
             text_mois.setVisibility(View.VISIBLE);
         }
-        if(messages.size()==0 ){
-            DatabaseReference refdisc=Db.getReference().child("Discussion");
-            if(disc_id!=null & disc_id.length()>2){
-                refdisc.child(disc_id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        finish();
-                    }
-                });
-            }
+        else{
+            messageEventListener.remove();
+            Toast.makeText(Activity_tchat.this, "messageEventListener Removed", Toast.LENGTH_SHORT).show();
+            finish();
         }
+
     }
 
     private String getDate(long time) {
         java.util.Calendar cal = java.util.Calendar.getInstance(Locale.ENGLISH);
         cal.setTimeInMillis(time * 1000);
-        String date = DateFormat.format("dd/MM", cal).toString();
+        String date = DateFormat.format("dd MM", cal).toString();
         String monthStr = "";
         Log.i("Firebase","monthStr :"+date.substring(3,5));
         switch(date.substring(3,5)) {

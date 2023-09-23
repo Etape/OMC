@@ -1,12 +1,11 @@
 package com.davinci.etone.omc;
 
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,6 +19,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -50,6 +55,14 @@ public class Activity_competitive extends AppCompatActivity {
     ArrayList<String> communes_listed_dep_ins=new ArrayList<>();
     ArrayList<String> communes_listed_reg_ins=new ArrayList<>();
     ArrayList<String> communes_listed_pays_ins=new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    CollectionReference refPre = db.collection("Preinscription");
+    CollectionReference refIns = db.collection("Inscription");
+    CollectionReference refUser = db.collection("User");
+    CollectionReference refDisc = db.collection("Discussion");
+    CollectionReference refHistory = db.collection("Info");
+    CollectionReference refBv = db.collection("Bv");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +72,8 @@ public class Activity_competitive extends AppCompatActivity {
         regIntent=getIntent().getStringExtra("reg");
         paysIntent=getIntent().getStringExtra("pays");
 
+        back=findViewById(R.id.back);
+        progressBar=findViewById(R.id.progressBar);
         recyclerViewactiv=findViewById(R.id.recyclerviewactiv);
         recyclerViewinact=findViewById(R.id.recyclerviewinact);
 
@@ -68,68 +83,50 @@ public class Activity_competitive extends AppCompatActivity {
         recyclerViewactiv.setAdapter(viewHolderAct);
         recyclerViewinact.setAdapter(viewHolderInAct);
 
-
-        DatabaseReference refPre=Db.getReference().child("Preinscription");
-        DatabaseReference refUsers=Db.getReference().child("User");
-        DatabaseReference refIns=Db.getReference().child("Inscription");
-
-        refPre.addValueEventListener(new ValueEventListener() {
+        refPre.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onEvent(@javax.annotation.Nullable QuerySnapshot preDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                 communes_listed_dep.clear();
                 communes_listed_reg.clear();
                 communes_listed_pays.clear();
                 ActivList.clear();
                 InactivList.clear();
                 pres.clear();
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                for (QueryDocumentSnapshot postSnapshot : preDocs) {
                     progressBar.setVisibility(View.VISIBLE);
-                    Preinscription bvi=postSnapshot.getValue(Preinscription.class);
+                    Preinscription bvi=map_pre(postSnapshot);
                     pres.add(bvi);
                 }
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
         });
-        refIns.addValueEventListener(new ValueEventListener() {
+        refIns.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                 communes_listed_dep_ins.clear();
                 communes_listed_reg_ins.clear();
                 communes_listed_pays_ins.clear();
                 ActivList.clear();
                 InactivList.clear();
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                for (QueryDocumentSnapshot postSnapshot : insDocs) {
                     progressBar.setVisibility(View.VISIBLE);
-                    Inscription bvi=postSnapshot.getValue(Inscription.class);
+                    Inscription bvi=map_ins(postSnapshot);
                     ins.add(bvi);
                 }
                 progressBar.setVisibility(View.GONE);
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
         });
-        refIns.addValueEventListener(new ValueEventListener() {
+        refUser.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                 users.clear();
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                for (QueryDocumentSnapshot userD : userDocs) {
                     progressBar.setVisibility(View.VISIBLE);
-                    User usr=postSnapshot.getValue(User.class);
-                    users.add(usr);
+                    User user = map_user(userD);
+                    users.add(user);
                 }
                 progressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
         ArrayList<String> communes_dep=new ArrayList<>();
@@ -284,13 +281,134 @@ public class Activity_competitive extends AppCompatActivity {
             viewHolderAct.notifyDataSetChanged();
         }
 
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
-
     public boolean verifyIn(String test, ArrayList<String> list){
         for (int i=0; i<list.size();i++){
             if (test.equals(list.get(i)))
                 return true;
         }
         return false;
+    }
+    public Bv map_bv(QueryDocumentSnapshot doc){
+        Bv bv1=new Bv();
+        bv1.bv_attente = Math.toIntExact(doc.getLong("bv_attente"));
+        bv1.bv_recolte = Math.toIntExact(doc.getLong("bv_recolte"));
+        bv1.bv_commune = doc.getString("bv_commune");
+        bv1.bv_dep = doc.getString("bv_dep");
+        bv1.bv_name = doc.getString("bv_name");
+        bv1.bv_pays = doc.getString("bv_pays");
+        bv1.bv_region = doc.getString("bv_region");
+        bv1.bv_vol1_name = doc.getString("bv_vol1_name");
+        bv1.bv_vol2_name = doc.getString("bv_vol2_name");
+        bv1.bv_vol3_name = doc.getString("bv_vol3_name");
+        bv1.bv_vol4_name = doc.getString("bv_vol4_name");
+        bv1.bv_vol1_tel = doc.getString("bv_vol1_tel");
+        bv1.bv_vol2_tel = doc.getString("bv_vol2_tel");
+        bv1.bv_vol3_tel = doc.getString("bv_vol3_tel");
+        bv1.bv_vol4_tel = doc.getString("bv_vol4_tel");
+        return bv1;
+    }
+    public User map_user(QueryDocumentSnapshot docU){
+        User user1=new User();
+        user1.id=docU.getString("id");
+        user1.cni=docU.getString("cni");
+        user1.activite= Math.toIntExact(docU.getLong("activite"));
+        user1.code=docU.getString("code");
+        user1.commune=docU.getString("commune");
+        user1.comite_base=docU.getString("comite_base");
+        user1.creation_date=docU.getLong("creation_date");
+        user1.date_naissance=docU.getString("date_naissance");
+        user1.departement=docU.getString("departement");
+        user1.departement_org=docU.getString("departement_org");
+        user1.email=docU.getString("email");
+        user1.matricule_parti=docU.getString("matricule_parti");
+        user1.nom=docU.getString("nom");
+        user1.parrain=docU.getString("parrain");
+        user1.pays=docU.getString("pays");
+        user1.parti=docU.getString("parti");
+        user1.password=docU.getString("password");
+        user1.region=docU.getString("region");
+        user1.prenom=docU.getString("prenom");
+        user1.sexe=docU.getString("sexe");
+        user1.sympatisant=docU.getString("sympatisant");
+        user1.type=docU.getString("type");
+        user1.sous_comite_arr=docU.getString("sous_comite_arr");
+        user1.telephone=docU.getString("telephone");
+        return user1;
+    }
+    public Inscription map_ins(QueryDocumentSnapshot insD){
+        Inscription ins = new Inscription();
+        ins.id = insD.getString("id");
+        ins.nom = insD.getString("nom");
+        ins.prenom = insD.getString("prenom");
+        ins.sexe = insD.getString("sexe");
+        ins.date_naissance = insD.getString("date_naissance");
+        ins.telephone = insD.getString("telephone");
+        ins.email = insD.getString("email");
+        ins.region = insD.getString("region");
+        ins.pays = insD.getString("pays");
+        ins.departement = insD.getString("departement");
+        ins.commune = insD.getString("commune");
+        ins.bv = insD.getString("bv");
+        ins.departement_org = insD.getString("departement_org");
+        ins.cni = insD.getString("cni");
+        ins.numero_ce = insD.getString("numero_ce");
+        ins.parrain = insD.getString("parrain");
+        ins.sympatisant = insD.getString("sympatisant");
+        ins.creation_date = insD.getLong("creation_date");
+        return ins;
+    }
+    public Preinscription map_pre(QueryDocumentSnapshot preD){
+        Preinscription pre = new Preinscription();
+        pre.id = preD.getString("id");
+        pre.nom = preD.getString("nom");
+        pre.prenom = preD.getString("prenom");
+        pre.sexe = preD.getString("sexe");
+        pre.date_naissance = preD.getString("date_naissance");
+        pre.telephone = preD.getString("telephone");
+        pre.email = preD.getString("email");
+        pre.region = preD.getString("region");
+        pre.pays = preD.getString("pays");
+        pre.parti = preD.getString("parti");
+        pre.matricule_parti = preD.getString("matricule_parti");
+        pre.departement = preD.getString("departement");
+        pre.commune = preD.getString("commune");
+        pre.departement_org = preD.getString("departement_org");
+        pre.cni = preD.getString("cni");
+        pre.parrain = preD.getString("parrain");
+        pre.sympatisant = preD.getString("sympatisant");
+        pre.creation_date = preD.getLong("creation_date");
+        return pre;
+
+    }
+    public Discussion map_disc(QueryDocumentSnapshot discD){
+        Discussion dis=new Discussion();
+        dis.id=discD.getString("id");
+        dis.title=discD.getString("title");
+        dis.type=discD.getString("type");
+        dis.initiateur=discD.getString("initiateur");
+        dis.interlocuteur=discD.getString("interlocuteur");
+        dis.last_date=discD.getLong("last_date");
+        dis.last_message=discD.getString("last_message");
+        dis.last_writer=discD.getString("last_writer");
+
+        return dis;
+    }
+    public Message map_mes(QueryDocumentSnapshot mesD){
+        Message mes=new Message();
+        mes.emetteur=mesD.getString("emetteur");
+        mes.recepteur=mesD.getString("recepteur");
+        mes.contenu=mesD.getString("contenu");
+        mes.disc_id=mesD.getString("disc_id");
+        mes.etat=mesD.getString("etat");
+        mes.id=mesD.getId();
+        mes.date_envoi=mesD.getLong("date_envoi");
+        return mes;
     }
 }

@@ -2,9 +2,10 @@ package com.davinci.etone.omc;
 
 import android.content.Intent;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -24,6 +25,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -48,11 +55,18 @@ public class Activity_personnel extends AppCompatActivity {
     ProgressBar progressBar;
     String user_id;
     LinearLayout edits;
-    DatabaseReference refUser = Db.getReference().child("User");
     ArrayList<String> postes=new ArrayList<>();
     ArrayList<String> communes=new ArrayList<>();
     ArrayList<String> regions=new ArrayList<>();
     ArrayList<String[]> rdc=new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    CollectionReference refPre = db.collection("Preinscription");
+    CollectionReference refIns = db.collection("Inscription");
+    CollectionReference refUser = db.collection("User");
+    CollectionReference refDisc = db.collection("Discussion");
+    CollectionReference refMes = db.collection("Message");
+    CollectionReference refBv = db.collection("Bv");
 
     private int calculateAge(long timebirth){
         int age = 0;
@@ -188,279 +202,236 @@ public class Activity_personnel extends AppCompatActivity {
         LoadCommunes();
 
         if(user_id!=null ){
-            refUser.child(user_id).addValueEventListener(new ValueEventListener() {
+            refUser.whereEqualTo("id",user_id).limit(1).addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    user = dataSnapshot.getValue(User.class);
-                    email.setText("Email : "+user.getEmail());
-                    id.setText("Id : "+user.getId());
-                    commune.setText("Militant Commune : "+user.getCommune());
-                    poste.setText("Poste : "+user.getType());
-                    edit_commune.setText(user.getCommune());
-                    edit_poste.setText(user.getType());
-                    telephone.setText("Telephone : "+user.getTelephone());
-                    complete_name.setText(user.getNom()+" "+ user.getPrenom());
-                    round_letter.setText(""+user.getNom().toUpperCase().charAt(0));
-                    big_initials.setText(user.getNom().substring(0,2).toUpperCase());
-                    nom_titre.setText(user.getNom().split(" ")[0]);
-                    sexe.setText("Sexe : " +user.getSexe());
-                    age.setText("Age : "+calculateAge(Long.valueOf(user.getDate_naissance())));
-                    DatabaseReference refBv=Db.getReference().child("Preinscription");
-                    final int[] couverturePre = {0};
-                    final int[] couvertureIns = {0};
-                    final int[] couverturePremois = {0};
-                    final int[] couvertureInsmois = {0};
-                    long actual=System.currentTimeMillis()/1000;
-                    edit.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if(edits.getVisibility()==View.VISIBLE){
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    for (QueryDocumentSnapshot userD : userDocs) {
+                        User user = map_user(userD);
+                        email.setText("Email : "+user.getEmail());
+                        id.setText("Id : "+user.getCode());
+                        commune.setText("Militant Commune : "+user.getCommune());
+                        poste.setText("Poste : "+user.getType());
+                        edit_commune.setText(user.getCommune());
+                        edit_poste.setText(user.getType());
+                        telephone.setText("Telephone : "+user.getTelephone());
+                        complete_name.setText(user.getNom()+" "+ user.getPrenom());
+                        round_letter.setText(""+user.getNom().toUpperCase().charAt(0));
+                        big_initials.setText(user.getNom().substring(0,2).toUpperCase());
+                        nom_titre.setText(user.getNom().split(" ")[0]);
+                        sexe.setText("Sexe : " +user.getSexe());
+                        age.setText("Age : "+calculateAge(Long.valueOf(user.getDate_naissance())));
+                        final int[] couverturePre = {0};
+                        final int[] couvertureIns = {0};
+                        final int[] couverturePremois = {0};
+                        final int[] couvertureInsmois = {0};
+                        long actual=System.currentTimeMillis()/1000;
+                        edit.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if(edits.getVisibility()==View.VISIBLE){
+                                    progressBar.setVisibility(View.VISIBLE);
+                                  if (edit_commune.getText().toString().isEmpty())
+                                      edit_commune.setHintTextColor(ContextCompat.getColor
+                                              (Activity_personnel.this, R.color.red));
+                                  else if (edit_poste.getText().toString().isEmpty())
+                                      edit_poste.setHintTextColor(ContextCompat.getColor(Activity_personnel.this, R
+                                              .color.red));
+                                  else{
+                                      refUser.document(user.getId()).update("region",getRegion(edit_commune.getText().toString()));
+                                      refUser.document(user.getId()).update("departement",getDepartement(edit_commune.getText().toString()));
+                                      refUser.document(user.getId()).update("commune",edit_commune.getText().toString());
+                                      refUser.document(user.getId()).update("type",edit_poste.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                          @Override
+                                          public void onComplete(@NonNull Task<Void> task) {
+                                              if(task.isSuccessful()){
+                                                  progressBar.setVisibility(View.GONE);
+                                                  edit.setImageResource(R.drawable.ic_mode_edit_white_24dp);
+                                                  edits.setVisibility(View.GONE);
+                                                  commune.setText("Militant Commune : "+edit_commune.getText().toString());
+                                                  poste.setText("Poste : "+edit_poste.getText().toString());
+                                                  commune.setVisibility(View.VISIBLE);
+                                                  poste.setVisibility(View.VISIBLE);
+                                              }
+                                              else {
+                                                  progressBar.setVisibility(View.GONE);
+                                                  edit.setImageResource(R.drawable.ic_mode_edit_white_24dp);
+                                                  edits.setVisibility(View.GONE);
+                                                  commune.setVisibility(View.VISIBLE);
+                                                  poste.setVisibility(View.VISIBLE);
+                                                  Toast.makeText(Activity_personnel.this, "Modification echouee, verifiez votre connexion Internet",
+                                                          Toast.LENGTH_SHORT).show();
+                                              }
+
+
+                                          }
+                                      });
+                                  }
+                                }
+                                else{
+                                    edit.setImageResource(R.drawable.ic_check_black_24dp);
+                                    edits.setVisibility(View.VISIBLE);
+                                    edit_commune.setText(edit_commune.getText().toString());
+                                    edit_poste.setText(user.getType());
+                                    commune.setVisibility(View.GONE);
+                                    poste.setVisibility(View.GONE);
+                                }
+                            }
+                        });
+                        message.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
                                 progressBar.setVisibility(View.VISIBLE);
-                              if (edit_commune.getText().toString().isEmpty())
-                                  edit_commune.setHintTextColor(ContextCompat.getColor
-                                          (Activity_personnel.this, R.color.red));
-                              else if (edit_poste.getText().toString().isEmpty())
-                                  edit_poste.setHintTextColor(ContextCompat.getColor(Activity_personnel.this, R
-                                          .color.red));
-                              else{
-                                  refUser.child(user.getId()).child("region").setValue
-                                          (getRegion(edit_commune.getText().toString()));
-                                  refUser.child(user.getId()).child("departement").setValue
-                                          (getDepartement(edit_commune.getText().toString()));
-                                  refUser.child(user.getId()).child("commune").setValue(edit_commune.getText().toString());
-                                  refUser.child(user.getId()).child("type").setValue(edit_poste.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                      @Override
-                                      public void onComplete(@NonNull Task<Void> task) {
-                                          if(task.isSuccessful()){
-                                              progressBar.setVisibility(View.GONE);
-                                              edit.setImageResource(R.drawable.ic_mode_edit_white_24dp);
-                                              edits.setVisibility(View.GONE);
-                                              commune.setText("Militant Commune : "+edit_commune.getText().toString());
-                                              poste.setText("Poste : "+edit_poste.getText().toString());
-                                              commune.setVisibility(View.VISIBLE);
-                                              poste.setVisibility(View.VISIBLE);
-                                          }
-                                          else {
-                                              progressBar.setVisibility(View.GONE);
-                                              edit.setImageResource(R.drawable.ic_mode_edit_white_24dp);
-                                              edits.setVisibility(View.GONE);
-                                              commune.setVisibility(View.VISIBLE);
-                                              poste.setVisibility(View.VISIBLE);
-                                              Toast.makeText(Activity_personnel.this, "Modification echouee, verifiez votre connexion Internet",
-                                                      Toast.LENGTH_SHORT).show();
-                                          }
-
-
-                                      }
-                                  });
-                              }
-                            }
-                            else{
-                                edit.setImageResource(R.drawable.ic_check_black_24dp);
-                                edits.setVisibility(View.VISIBLE);
-                                edit_commune.setText(edit_commune.getText().toString());
-                                edit_poste.setText(user.getType());
-                                commune.setVisibility(View.GONE);
-                                poste.setVisibility(View.GONE);
-                            }
-                        }
-                    });
-                    message.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            progressBar.setVisibility(View.VISIBLE);
-                            DatabaseReference refDisc=Db.getReference().child("Discussion");
-                            DatabaseReference refu=Db.getReference().child("User");
-                            refu.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                        User usr = postSnapshot.getValue(User.class);
-                                        if (usr.getEmail().equals(Ui.getEmail())) {
-                                            refDisc.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                    int i=0;
-                                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                                        i++;
-                                                        Discussion ds=postSnapshot.getValue(Discussion.class);
-                                                        if (ds.getType().equals("tchat") & (ds.getInterlocuteur().equals(user_id) & ds.getInitiateur().equals(usr.getId()))
-                                                                | ds.getInterlocuteur().equals(usr.getId()) & ds.getInitiateur().equals(user_id)){
-                                                            Intent intent= new Intent(Activity_personnel.this,Activity_tchat.class);
-                                                            intent.putExtra("Id_disc",ds.getId());
-                                                            intent.putExtra("user_id",usr.getId());
-                                                            intent.putExtra("disc_title",ds.getTitle());
-                                                            intent.putExtra("type",ds.getType());
-                                                            progressBar.setVisibility(View.GONE);
-                                                            startActivity(intent);
-                                                            break;
-                                                        }
-                                                        else if(i==dataSnapshot.getChildrenCount()){
-                                                            Discussion dsc= new Discussion();
-                                                            dsc.setTitle(user.getNom());
-                                                            dsc.setType("tchat");
-                                                            dsc.setInitiateur(usr.getId());
-                                                            dsc.setInterlocuteur(user_id);
-                                                            String key = refDisc.push().getKey();
-                                                            dsc.setId(key);
-                                                            refDisc.child(key).setValue(dsc).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                    Intent intent= new Intent(Activity_personnel.this,Activity_tchat.class);
-                                                                    intent.putExtra("Id_disc",dsc.getId());
-                                                                    intent.putExtra("user_id",usr.getId());
-                                                                    intent.putExtra("disc_title",dsc.getTitle());
-                                                                    intent.putExtra("type",dsc.getType());
-                                                                    progressBar.setVisibility(View.GONE);
-                                                                    startActivity(intent);
-                                                                    finish();
-                                                                }
-                                                            });
+                                refUser.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                                        for (QueryDocumentSnapshot userD : userDocs) {
+                                            User usr = map_user(userD);
+                                            if (usr.getEmail().equals(Ui.getEmail())) {
+                                                refDisc.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                                    @Override
+                                                    public void onEvent(@Nullable QuerySnapshot discDocs, @Nullable FirebaseFirestoreException e) {
+                                                        int i=0;
+                                                        for (QueryDocumentSnapshot discD:discDocs) {
+                                                            Discussion ds=map_disc(discD);
+                                                            if (ds.getType().equals("tchat") & (ds.getInterlocuteur().equals(user_id) & ds.getInitiateur().equals(usr.getId()))
+                                                                    | ds.getInterlocuteur().equals(usr.getId()) & ds.getInitiateur().equals(user_id)){
+                                                                Intent intent= new Intent(Activity_personnel.this,Activity_tchat.class);
+                                                                intent.putExtra("Id_disc",ds.getId());
+                                                                intent.putExtra("user_id",usr.getId());
+                                                                intent.putExtra("disc_title",ds.getTitle());
+                                                                intent.putExtra("type",ds.getType());
+                                                                progressBar.setVisibility(View.GONE);
+                                                                startActivity(intent);
+                                                                break;
+                                                            }
+                                                            else if(i==discDocs.size()){
+                                                                Discussion dsc= new Discussion();
+                                                                dsc.setTitle(user.getNom());
+                                                                dsc.setType("tchat");
+                                                                dsc.setInitiateur(usr.getId());
+                                                                dsc.setInterlocuteur(user_id);
+                                                                String key = refDisc.document().getId();
+                                                                dsc.setId(key);
+                                                                refDisc.document(key).set(dsc).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                        Intent intent= new Intent(Activity_personnel.this,Activity_tchat.class);
+                                                                        intent.putExtra("Id_disc",dsc.getId());
+                                                                        intent.putExtra("user_id",usr.getId());
+                                                                        intent.putExtra("disc_title",dsc.getTitle());
+                                                                        intent.putExtra("type",dsc.getType());
+                                                                        progressBar.setVisibility(View.GONE);
+                                                                        startActivity(intent);
+                                                                        finish();
+                                                                    }
+                                                                });
+                                                            }
                                                         }
                                                     }
-                                                }
 
-                                                @Override
-                                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                }
-                                            });
+                                                });
+                                            }
                                         }
                                     }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-                        }
-                    });
-                    refBv.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                Preinscription pre=postSnapshot.getValue(Preinscription.class);
-                                if (pre.getParrain().equals(user.getId())){
+                                });
+                            }
+                        });
+                        refPre.whereEqualTo("parrain",user.getId()).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                                for (QueryDocumentSnapshot insD : insDocs) {
+                                    Preinscription pre = map_pre(insD);
                                     couverturePre[0]++;
                                     if (actual-pre.getCreation_date()<30*24*3600)
                                         couverturePremois[0]++;
 
+
                                 }
-                            }
-                            Db.getReference().child("Inscription").addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                        Inscription ins=postSnapshot.getValue(Inscription.class);
-                                        if (ins.getParrain().equals(user.getId())){
-                                            couvertureIns[0]++;
-                                            if (actual-ins.getCreation_date()<30*24*3600)
-                                                couvertureInsmois[0]++;
+                                refIns.whereEqualTo("parrain",user.getId()).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                                        for (QueryDocumentSnapshot insD : insDocs) {
+                                            Inscription ins = map_ins(insD);
+                                            if (ins.getParrain().equals(user.getId())){
+                                                couvertureIns[0]++;
+                                                if (actual-ins.getCreation_date()<30*24*3600)
+                                                    couvertureInsmois[0]++;
+                                            }
                                         }
+                                        efforts_totaux.setText("Efforts globaux : " +
+                                                ""+couverturePre[0]+" " +
+                                                " Preins/"+couvertureIns[0]+" Ins");
+                                        efforts_mois.setText("Efforts du mois: " +
+                                                ""+couverturePre[0]+" " +
+                                                "Preins/"+couvertureIns[0]+" Ins");
+                                        progressBar.setVisibility(View.GONE);
                                     }
-                                    efforts_totaux.setText("Efforts globaux : " +
-                                            ""+couverturePre[0]+" " +
-                                            " Preins/"+couvertureIns[0]+" Ins");
-                                    efforts_mois.setText("Efforts du mois: " +
-                                            ""+couverturePre[0]+" " +
-                                            "Preins/"+couvertureIns[0]+" Ins");
-                                    progressBar.setVisibility(View.GONE);
-                                }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-                        }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
+                                });
+                            }
+                        });
+                    }
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
             });
         }
         else{
             message.setVisibility(View.GONE);
             edit.setVisibility(View.GONE);
-            refUser.addValueEventListener(new ValueEventListener() {
+            refUser.whereEqualTo("id",user_id).limit(1).addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    for(DataSnapshot postSnapshot : dataSnapshot.getChildren() ){
-                       User usr = postSnapshot.getValue(User.class);
-                       if (usr.getEmail().equals(Ui.getEmail())) {
-                            user=dataSnapshot.getValue(User.class);
-                           email.setText("Email : "+usr.getEmail());
-                           id.setText("Id : "+usr.getId());
-                           commune.setText("Militant Commune : "+usr.getCommune());
-                           poste.setText("Poste : "+usr.getType());
-                           telephone.setText("Telephone : "+usr.getTelephone());
-                           complete_name.setText(usr.getNom()+" "+ usr.getPrenom());
-                           round_letter.setText(""+usr.getNom().toUpperCase().charAt(0));
-                           big_initials.setText(usr.getNom().substring(0,2).toUpperCase());
-                           nom_titre.setText(usr.getNom());
-                           sexe.setText("Sexe : "+usr.getSexe());
-                           age.setText("Age : "+calculateAge(Long.valueOf(usr.getDate_naissance())));
-                           DatabaseReference refBv=Db.getReference().child("Preinscription");
-                           final int[] couverturePre = {0};
-                           final int[] couvertureIns = {0};
-                           final int[] couverturePremois = {0};
-                           final int[] couvertureInsmois = {0};
-                           long actual=System.currentTimeMillis()/1000;
-                           refBv.addValueEventListener(new ValueEventListener() {
-                               @Override
-                               public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                   for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                       Preinscription pre=postSnapshot.getValue(Preinscription.class);
-                                       if (pre.getParrain().equals(user.getId())){
-                                           couverturePre[0]++;
-                                           if (actual-pre.getCreation_date()<30*24*3600)
-                                               couverturePremois[0]++;
-
-                                       }
-                                   }
-                                   Db.getReference().child("Inscription").addValueEventListener(new ValueEventListener() {
-                                       @Override
-                                       public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                           for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                               Inscription ins=postSnapshot.getValue(Inscription.class);
-                                               if (ins.getParrain().equals(user.getId())){
-                                                   couvertureIns[0]++;
-                                                   if (actual-ins.getCreation_date()<30*24*3600)
-                                                       couvertureInsmois[0]++;
-                                               }
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    for (QueryDocumentSnapshot userD : userDocs) {
+                        User usr = map_user(userD);
+                       email.setText("Email : "+usr.getEmail());
+                       id.setText("Id : "+usr.getCode());
+                       commune.setText("Militant Commune : "+usr.getCommune());
+                       poste.setText("Poste : "+usr.getType());
+                       telephone.setText("Telephone : "+usr.getTelephone());
+                       complete_name.setText(usr.getNom()+" "+ usr.getPrenom());
+                       round_letter.setText(""+usr.getNom().toUpperCase().charAt(0));
+                       big_initials.setText(usr.getNom().substring(0,2).toUpperCase());
+                       nom_titre.setText(usr.getNom());
+                       sexe.setText("Sexe : "+usr.getSexe());
+                       age.setText("Age : "+calculateAge(Long.valueOf(usr.getDate_naissance())));
+                       final int[] couverturePre = {0};
+                       final int[] couvertureIns = {0};
+                       final int[] couverturePremois = {0};
+                       final int[] couvertureInsmois = {0};
+                       long actual=System.currentTimeMillis()/1000;
+                        refPre.whereEqualTo("parrain",user.getId()).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                                for (QueryDocumentSnapshot insD : insDocs) {
+                                    Preinscription pre = map_pre(insD);
+                                    couverturePre[0]++;
+                                    if (actual-pre.getCreation_date()<30*24*3600)
+                                        couverturePremois[0]++;
+                               }
+                                refIns.whereEqualTo("parrain",user.getId()).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                                        for (QueryDocumentSnapshot insD : insDocs) {
+                                            Inscription ins = map_ins(insD);
+                                           if (ins.getParrain().equals(user.getId())){
+                                               couvertureIns[0]++;
+                                               if (actual-ins.getCreation_date()<30*24*3600)
+                                                   couvertureInsmois[0]++;
                                            }
-                                           efforts_totaux.setText("Efforts globaux : " + ""+couverturePre[0]+"/"+couvertureIns[0]);
-                                           efforts_mois.setText("Efforts des derniers 30 jours :" + ""+couverturePremois[0]+"/"+couvertureInsmois[0]);
-                                           progressBar.setVisibility(View.GONE);
                                        }
+                                       efforts_totaux.setText("Efforts globaux : " + ""+couverturePre[0]+"/"+couvertureIns[0]);
+                                       efforts_mois.setText("Efforts des derniers 30 jours :" + ""+couverturePremois[0]+"/"+couvertureInsmois[0]);
+                                       progressBar.setVisibility(View.GONE);
+                                   }
 
-                                       @Override
-                                       public void onCancelled(@NonNull DatabaseError databaseError) {
+                               });
+                           }
+                       });
+                        progressBar.setVisibility(View.GONE);
+                        break;
 
-                                       }
-                                   });
-                               }
-                               @Override
-                               public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                               }
-                           });
-                            progressBar.setVisibility(View.GONE);
-                            break;
-                       }
                     }
-
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
             });
@@ -494,5 +465,125 @@ public class Activity_personnel extends AppCompatActivity {
         else
             finish();
 
+    }
+    public Bv map_bv(QueryDocumentSnapshot doc){
+        Bv bv1=new Bv();
+        bv1.bv_attente = Math.toIntExact(doc.getLong("bv_attente"));
+        bv1.bv_recolte = Math.toIntExact(doc.getLong("bv_recolte"));
+        bv1.bv_commune = doc.getString("bv_commune");
+        bv1.bv_dep = doc.getString("bv_dep");
+        bv1.bv_name = doc.getString("bv_name");
+        bv1.bv_pays = doc.getString("bv_pays");
+        bv1.bv_region = doc.getString("bv_region");
+        bv1.bv_vol1_name = doc.getString("bv_vol1_name");
+        bv1.bv_vol2_name = doc.getString("bv_vol2_name");
+        bv1.bv_vol3_name = doc.getString("bv_vol3_name");
+        bv1.bv_vol4_name = doc.getString("bv_vol4_name");
+        bv1.bv_vol1_tel = doc.getString("bv_vol1_tel");
+        bv1.bv_vol2_tel = doc.getString("bv_vol2_tel");
+        bv1.bv_vol3_tel = doc.getString("bv_vol3_tel");
+        bv1.bv_vol4_tel = doc.getString("bv_vol4_tel");
+        return bv1;
+    }
+    public User map_user(QueryDocumentSnapshot docU){
+        User user1=new User();
+        user1.id=docU.getString("id");
+        user1.cni=docU.getString("cni");
+        user1.activite= Math.toIntExact(docU.getLong("activite"));
+        user1.code=docU.getString("code");
+        user1.commune=docU.getString("commune");
+        user1.comite_base=docU.getString("comite_base");
+        user1.creation_date=docU.getLong("creation_date");
+        user1.date_naissance=docU.getString("date_naissance");
+        user1.departement=docU.getString("departement");
+        user1.departement_org=docU.getString("departement_org");
+        user1.email=docU.getString("email");
+        user1.matricule_parti=docU.getString("matricule_parti");
+        user1.nom=docU.getString("nom");
+        user1.parrain=docU.getString("parrain");
+        user1.pays=docU.getString("pays");
+        user1.parti=docU.getString("parti");
+        user1.password=docU.getString("password");
+        user1.region=docU.getString("region");
+        user1.prenom=docU.getString("prenom");
+        user1.sexe=docU.getString("sexe");
+        user1.sympatisant=docU.getString("sympatisant");
+        user1.type=docU.getString("type");
+        user1.sous_comite_arr=docU.getString("sous_comite_arr");
+        user1.telephone=docU.getString("telephone");
+        return user1;
+    }
+    public Inscription map_ins(QueryDocumentSnapshot insD){
+        Inscription ins = new Inscription();
+        ins.id = insD.getString("id");
+        ins.nom = insD.getString("nom");
+        ins.prenom = insD.getString("prenom");
+        ins.sexe = insD.getString("sexe");
+        ins.date_naissance = insD.getString("date_naissance");
+        ins.telephone = insD.getString("telephone");
+        ins.email = insD.getString("email");
+        ins.region = insD.getString("region");
+        ins.pays = insD.getString("pays");
+        ins.departement = insD.getString("departement");
+        ins.commune = insD.getString("commune");
+        ins.bv = insD.getString("bv");
+        ins.departement_org = insD.getString("departement_org");
+        ins.cni = insD.getString("cni");
+        ins.numero_ce = insD.getString("numero_ce");
+        ins.parrain = insD.getString("parrain");
+        ins.sympatisant = insD.getString("sympatisant");
+        ins.creation_date = insD.getLong("creation_date");
+        return ins;
+    }
+    public Preinscription map_pre(QueryDocumentSnapshot preD){
+        Preinscription pre = new Preinscription();
+        pre.id = preD.getString("id");
+        pre.nom = preD.getString("nom");
+        pre.prenom = preD.getString("prenom");
+        pre.sexe = preD.getString("sexe");
+        pre.date_naissance = preD.getString("date_naissance");
+        pre.telephone = preD.getString("telephone");
+        pre.email = preD.getString("email");
+        pre.region = preD.getString("region");
+        pre.pays = preD.getString("pays");
+        pre.parti = preD.getString("parti");
+        pre.matricule_parti = preD.getString("matricule_parti");
+        pre.departement = preD.getString("departement");
+        pre.commune = preD.getString("commune");
+        pre.departement_org = preD.getString("departement_org");
+        pre.cni = preD.getString("cni");
+        pre.parrain = preD.getString("parrain");
+        pre.sympatisant = preD.getString("sympatisant");
+        pre.creation_date = preD.getLong("creation_date");
+        return pre;
+
+    }
+    public Discussion map_disc(QueryDocumentSnapshot discD){
+        Discussion dis=new Discussion();
+        dis.id=discD.getString("id");
+        dis.title=discD.getString("title");
+        dis.type=discD.getString("type");
+        try{
+            dis.last_message=discD.getString("last_message");
+            dis.last_writer=discD.getString("last_writer");
+            dis.last_date=discD.getLong("last_date");
+            dis.initiateur=discD.getString("initiateur");
+            dis.interlocuteur=discD.getString("interlocuteur");
+        }
+        catch (Exception e2){
+        }
+
+        return dis;
+    }
+    public Message map_mes(QueryDocumentSnapshot mesD){
+        Message mes=new Message();
+        mes.emetteur=mesD.getString("emetteur");
+        mes.recepteur=mesD.getString("recepteur");
+        mes.contenu=mesD.getString("contenu");
+        mes.disc_id=mesD.getString("disc_id");
+        mes.etat=mesD.getString("etat");
+        mes.id=mesD.getId();
+        mes.date_envoi=mesD.getLong("date_envoi");
+        return mes;
     }
 }

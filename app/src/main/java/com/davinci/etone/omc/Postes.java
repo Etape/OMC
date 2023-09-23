@@ -38,7 +38,7 @@ public class Postes {
                     this.categorie = "A";
                 else if(i>=4 & i<14)
                     this.categorie = "B";
-                else if(i>=14 & i<postes.size()-2)
+                else if(i>=14 & i<postes.size()-1)
                     this.categorie = "C";
                 else
                     this.categorie = "D";
@@ -48,27 +48,25 @@ public class Postes {
         for (int i=0;i<postes.size();i++){
             if (postes.get(i).toUpperCase().equals(intitule.toUpperCase().trim())){
                 if (i<4)
-                    this.zone = "all";
+                    this.zone = "6";
                 else if(i>=4 & i<14){
                     if (intitule.equals("DEC") | intitule.equals("SG CA") )
-                    this.zone = "commune";
+                        this.zone = "1";
                     else if (intitule.equals("DED"))
-                        this.zone = "departement";
+                        this.zone = "2";
                     else if (intitule.equals("DER") | intitule.contains("Region"))
-                        this.zone = "region";
+                        this.zone = "3";
                     else if (intitule.equals("DEPAYS"))
-                        this.zone = "pays";
+                        this.zone = "4";
                     else if (intitule.equals("DECON"))
-                        this.zone = "continent";
-                    else if (intitule.contains("Comm"))
-                        this.zone = "com";
+                        this.zone = "5";
                     else
-                        this.zone= "commune";
+                        this.zone= "1";
                 }
-                else if(i>=14 & i<postes.size()-2)
-                    this.zone = "self";
+                else if(i>=14 & i<postes.size()-1)
+                    this.zone = "0";
                 else
-                    this.zone = "none";
+                    this.zone = "-1";
             }
         }
     }
@@ -104,7 +102,7 @@ public class Postes {
                     this.categorie = "A";
                 else if(i>=4 & i<15)
                     this.categorie = "B";
-                else if(i>=15 & i<postes.size()-2)
+                else if(i>=15 & i<postes.size()-1)
                     this.categorie = "C";
                 else
                     this.categorie = "D";
@@ -113,27 +111,25 @@ public class Postes {
         for (int i=0;i<postes.size();i++){
             if (postes.get(i).toUpperCase().equals(intitule.toUpperCase().trim())){
                 if (i<4)
-                    this.zone = "all";
+                    this.zone = "6";
                 else if(i>=4 & i<14){
                     if (intitule.equals("DEC") | intitule.equals("SG CA") )
-                        this.zone = "commune";
+                        this.zone = "1";
                     else if (intitule.equals("DED"))
-                        this.zone = "departement";
+                        this.zone = "2";
                     else if (intitule.equals("DER") | intitule.contains("Region"))
-                        this.zone = "region";
+                        this.zone = "3";
                     else if (intitule.equals("DEPAYS"))
-                        this.zone = "pays";
+                        this.zone = "4";
                     else if (intitule.equals("DECON"))
-                        this.zone = "continent";
-                    else if (intitule.contains("Comm"))
-                        this.zone = "com";
+                        this.zone = "5";
                     else
-                        this.zone= "commune";
+                        this.zone= "1";
                 }
-                else if(i>=14 & i<postes.size()-2)
-                    this.zone = "self";
+                else if(i>=14 & i<postes.size()-1)
+                    this.zone = "0";
                 else
-                    this.zone = "none";
+                    this.zone = "-1";
             }
         }
     }

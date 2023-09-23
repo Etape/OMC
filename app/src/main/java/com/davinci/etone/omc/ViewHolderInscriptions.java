@@ -1,30 +1,17 @@
 package com.davinci.etone.omc;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
-import android.text.format.DateFormat;
-import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -56,7 +43,7 @@ public class ViewHolderInscriptions extends RecyclerView.Adapter<ViewHolderInscr
         viewHolder.person_commune.setText("BV : "+user.getBv());
         viewHolder.person_reg.setText("enregistre le : "+getDate(user.getCreation_date()));
         viewHolder.person_poste.setText("Sexe : "+user.getSexe()+"  Age : "+calculateAge(Long
-                .getLong(user.getDate_naissance())));
+                .valueOf(user.getDate_naissance())));
 
     }
 

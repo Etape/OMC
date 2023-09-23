@@ -1,8 +1,9 @@
 package com.davinci.etone.omc;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +18,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class Activity_menu extends AppCompatActivity {
     TextView addEvent,account,help,preferences,apropos,add_event,add_info,add_action,apropos_txt,deconnexion;
@@ -27,6 +34,14 @@ public class Activity_menu extends AppCompatActivity {
     FirebaseUser Ui=auth.getCurrentUser();
 
     FirebaseDatabase Db=FirebaseDatabase.getInstance();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    CollectionReference refPre = db.collection("Preinscription");
+    CollectionReference refIns = db.collection("Inscription");
+    CollectionReference refUser = db.collection("User");
+    CollectionReference refDisc = db.collection("Discussion");
+    CollectionReference refMes = db.collection("Message");
+    CollectionReference refBv = db.collection("Bv");
     boolean see_events=false,see_apropos=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,28 +61,21 @@ public class Activity_menu extends AppCompatActivity {
         back=findViewById(R.id.back);
         moreEvents=findViewById(R.id.more_events);
 
-        DatabaseReference userRef=Db.getReference().child("User");
-        userRef.addValueEventListener(new ValueEventListener() {
+        refUser.whereEqualTo("email", Ui.getEmail()).limit(1).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot postSnapshot : dataSnapshot.getChildren() ){
-                    User usr = postSnapshot.getValue(User.class);
-                    if (usr.getEmail().equals(Ui.getEmail())) {
-                        user=postSnapshot.getValue(User.class);
-                        Postes poste= new Postes(user.getType());
-                        Log.i("Firebase user type",user.getType());
-                        Log.i("Firebase categorie",poste.getCategorie());
-                        if (poste.getCategorie().equals("C") | poste.getCategorie().equals("D")){
-                            addEvent.setVisibility(View.GONE);
-                        }
+            public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                for (QueryDocumentSnapshot userD : userDocs) {
+                    User user = map_user(userD);
+                    Postes poste= new Postes(user.getType());
+                    Log.i("Firebase user type",user.getType());
+                    Log.i("Firebase categorie",poste.getCategorie());
+                    if (poste.getCategorie().equals("C") | poste.getCategorie().equals("D")){
+                        addEvent.setVisibility(View.GONE);
                     }
+
                 }
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
         });
         addEvent.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -135,5 +143,60 @@ public class Activity_menu extends AppCompatActivity {
 
 
 
+    }
+    public User map_user(QueryDocumentSnapshot docU){
+        User user1=new User();
+        try{
+            String test=docU.getString("email");
+
+            user1.id=docU.getString("id");
+            user1.cni=docU.getString("cni");
+            try {
+                user1.activite = Math.toIntExact(docU.getLong("activite"));
+            }
+            catch (Exception e1){
+                user1.activite=0;
+            }
+            user1.code=docU.getString("code");
+            user1.commune=docU.getString("commune");
+            user1.comite_base=docU.getString("comite_base");
+            try {
+                user1.creation_date=docU.getLong("creation_date");
+            }
+            catch (Exception e1){
+
+            }
+            try {
+                user1.date_naissance = docU.getString("date_naissance");
+            }
+            catch (Exception e3){
+                user1.date_naissance = ""+docU.getLong("date_naissance");
+            }
+            user1.departement=docU.getString("departement");
+            user1.departement_org=docU.getString("departement_org");
+            user1.email=docU.getString("email");
+            user1.matricule_parti=docU.getString("matricule_parti");
+            user1.nom=docU.getString("nom");
+            user1.parrain=docU.getString("parrain");
+            user1.pays=docU.getString("pays");
+            user1.parti=docU.getString("parti");
+            user1.password=docU.getString("password");
+            user1.region=docU.getString("region");
+            user1.prenom=docU.getString("prenom");
+            user1.sexe=docU.getString("sexe");
+            user1.sympatisant=docU.getString("sympatisant");
+            user1.type=docU.getString("type");
+            user1.sous_comite_arr=docU.getString("sous_comite_arr");
+            user1.telephone=docU.getString("telephone");
+
+        }
+        catch (Exception e4){
+            user1.prenom=docU.getString("prenom");
+            user1.nom=docU.getString("nom");
+            user1.id=docU.getString("id");
+            user1.type=docU.getString("type");
+
+        }
+        return user1;
     }
 }

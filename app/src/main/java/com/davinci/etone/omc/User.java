@@ -98,7 +98,7 @@ public class User {
     public void setId(String id) {
         this.id = id;
         if(id.length()>9)
-        this.code=id.substring(id.length()-9,id.length()-1);
+            this.code=id.substring(id.length()-9,id.length()-1);
     }
 
     public String getNom() {

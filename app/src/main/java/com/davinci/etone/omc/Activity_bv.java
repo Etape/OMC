@@ -1,10 +1,11 @@
 package com.davinci.etone.omc;
 
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -13,7 +14,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +24,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,6 +64,14 @@ public class Activity_bv extends AppCompatActivity {
     TextView commune_name,commune_prd,nb_bv,nb_ins,nb_pre,nb_mil,activite_30j,activite_24h,commune_actives,commune_inactives,title;
     RecyclerView recyclerViewCom,recyclerViewDep,recyclerViewReg,recyclerViewPays;
     ViewHolderMilitants viewHolderMil;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    CollectionReference refPre = db.collection("Preinscription");
+    CollectionReference refIns = db.collection("Inscription");
+    CollectionReference refUser = db.collection("User");
+    CollectionReference refDisc = db.collection("Discussion");
+    CollectionReference refMes = db.collection("Message");
+    CollectionReference refBv = db.collection("Bv");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +109,7 @@ public class Activity_bv extends AppCompatActivity {
         recyclerViewPays.setAdapter(viewHolderMil);
 
         bv_name=findViewById(R.id.nom);
+        back=findViewById(R.id.back);
         region=findViewById(R.id.region);
         departement=findViewById(R.id.departement);
         commune=findViewById(R.id.commune);
@@ -133,13 +148,12 @@ public class Activity_bv extends AppCompatActivity {
             String com=values[1];
             String dep=values[2];
 
-            DatabaseReference ref = Db.getReference().child("Bv");
-            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            refBv.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot bvDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     progressBar.setVisibility(View.VISIBLE);
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        Bv bvi=postSnapshot.getValue(Bv.class);
+                    for (QueryDocumentSnapshot postSnapshot : bvDocs) {
+                        Bv bvi=map_bv(postSnapshot);
                         if(bvi.getBv_dep().equals(dep) & bvi.getBv_commune().equals(com) & bvi.getBv_name().equals(bv)){
                             bv_name.setText(bv);
                             region.setText(bvi.getBv_region());
@@ -155,10 +169,6 @@ public class Activity_bv extends AppCompatActivity {
                     }
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
         }
 
@@ -174,18 +184,15 @@ public class Activity_bv extends AppCompatActivity {
                     commune_prd.setText("Cameroun, "+rdc.get(i)[0]+", "+rdc.get(i)[1]);
                 }
             }
-            DatabaseReference refBv=Db.getReference().child("Bv");
-            DatabaseReference refUser=Db.getReference().child("User");
-            DatabaseReference refPre=Db.getReference().child("Preinscription");
-            DatabaseReference refIns=Db.getReference().child("Inscription");
 
-            refBv.addValueEventListener(new ValueEventListener() {
+            refBv.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    int count =0;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot bvDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    int count=0;
+                    for (QueryDocumentSnapshot postSnapshot : bvDocs) {
+                        Bv bvi=map_bv(postSnapshot);
                         progressBar.setVisibility(View.VISIBLE);
-                        Bv bvi=postSnapshot.getValue(Bv.class);
                         if(bvi.getBv_commune().equals(comIntent)){
                             count+=1;
                         }
@@ -194,18 +201,14 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
-            refUser.addValueEventListener(new ValueEventListener() {
+            refUser.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    int count =0;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        progressBar.setVisibility(View.VISIBLE);
-                        User bvi=postSnapshot.getValue(User.class);
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    int count=0;
+                    for (QueryDocumentSnapshot postSnapshot : userDocs) {
+                        User bvi=map_user(postSnapshot);
                         bureau.clear();
                         if(bvi.getCommune().equals(comIntent) & !bvi.getType().equals("Citoyen")) {
                             count+=1;
@@ -219,25 +222,21 @@ public class Activity_bv extends AppCompatActivity {
                     viewHolderMil.notifyDataSetChanged();
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
             final int[] act24h = {0};
             final int[] act30j = {0};
             final int[] act24ih = {0};
             final int[] act30ij = {0};
-            refPre.addValueEventListener(new ValueEventListener() {
+            refPre.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot preDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     int count =0;
                     act30j[0]=0;
                     act24h[0]=0;
                     long actual=System.currentTimeMillis()/1000;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    for (QueryDocumentSnapshot postSnapshot : preDocs) {
                         progressBar.setVisibility(View.VISIBLE);
-                        Preinscription bvi=postSnapshot.getValue(Preinscription.class);
+                        Preinscription bvi=map_pre(postSnapshot);
                         if(bvi.getCommune().equals(comIntent) ){
                             count+=1;
                             if (actual-bvi.getCreation_date()<3600*24){
@@ -254,21 +253,17 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
-            refIns.addValueEventListener(new ValueEventListener() {
+            refIns.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     int count =0;
                     act30ij[0]=0;
                     act24ih[0]=0;
                     long actual=System.currentTimeMillis()/1000;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    for (QueryDocumentSnapshot postSnapshot : insDocs) {
                         progressBar.setVisibility(View.VISIBLE);
-                        Inscription bvi=postSnapshot.getValue(Inscription.class);
+                        Inscription bvi=map_ins(postSnapshot);
                         if(bvi.getCommune().equals(comIntent) ){
                             count+=1;
                             if (actual-bvi.getCreation_date()<3600*24){
@@ -283,10 +278,6 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
 
             activite_24h.setText("Activite des 24h  : "+ act24h[0]+act24ih[0]);
@@ -305,18 +296,14 @@ public class Activity_bv extends AppCompatActivity {
                     commune_prd.setText("Cameroun, "+rdc.get(i)[0]);
                 }
             }
-            DatabaseReference refBv=Db.getReference().child("Bv");
-            DatabaseReference refUser=Db.getReference().child("User");
-            DatabaseReference refPre=Db.getReference().child("Preinscription");
-            DatabaseReference refIns=Db.getReference().child("Inscription");
 
-            refBv.addValueEventListener(new ValueEventListener() {
+            refBv.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    int count =0;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        progressBar.setVisibility(View.VISIBLE);
-                        Bv bvi=postSnapshot.getValue(Bv.class);
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot bvDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    int count=0;
+                    for (QueryDocumentSnapshot postSnapshot : bvDocs) {
+                        Bv bvi=map_bv(postSnapshot);
                         if(bvi.getBv_dep().equals(depIntent)){
                             count+=1;
                         }
@@ -325,18 +312,14 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
-            refUser.addValueEventListener(new ValueEventListener() {
+            refUser.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    int count =0;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        progressBar.setVisibility(View.VISIBLE);
-                        User bvi=postSnapshot.getValue(User.class);
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    int count=0;
+                    for (QueryDocumentSnapshot postSnapshot : userDocs) {
+                        User bvi=map_user(postSnapshot);
                         bureau.clear();
                         if(bvi.getDepartement().equals(comIntent) & !bvi.getType().equals("Citoyen")) {
                             count+=1;
@@ -350,25 +333,21 @@ public class Activity_bv extends AppCompatActivity {
                     viewHolderMil.notifyDataSetChanged();
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
             final int[] act24h = {0};
             final int[] act30j = {0};
             final int[] act24ih = {0};
             final int[] act30ij = {0};
-            refPre.addValueEventListener(new ValueEventListener() {
+            refPre.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot preDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     int count =0;
                     act30j[0]=0;
                     act24h[0]=0;
                     long actual=System.currentTimeMillis()/1000;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    for (QueryDocumentSnapshot postSnapshot : preDocs) {
                         progressBar.setVisibility(View.VISIBLE);
-                        Preinscription bvi=postSnapshot.getValue(Preinscription.class);
+                        Preinscription bvi=map_pre(postSnapshot);
                         if(bvi.getCommune().equals(comIntent) ){
                             count+=1;
                             if (actual-bvi.getCreation_date()<3600*24){
@@ -385,21 +364,17 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
-            refIns.addValueEventListener(new ValueEventListener() {
+            refIns.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     int count =0;
                     act30ij[0]=0;
                     act24ih[0]=0;
                     long actual=System.currentTimeMillis()/1000;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    for (QueryDocumentSnapshot postSnapshot : insDocs) {
                         progressBar.setVisibility(View.VISIBLE);
-                        Inscription bvi=postSnapshot.getValue(Inscription.class);
+                        Inscription bvi=map_ins(postSnapshot);
                         if(bvi.getDepartement().equals(comIntent) ){
                             count+=1;
                             if (actual-bvi.getCreation_date()<3600*24){
@@ -414,10 +389,6 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
 
             activite_24h.setText("Activite des 24h  : "+ act24h[0]+act24ih[0]);
@@ -450,18 +421,14 @@ public class Activity_bv extends AppCompatActivity {
             commune_actives.setClickable(true);
             commune_inactives.setClickable(true);
             commune_prd.setText("Cameroun ");
-            DatabaseReference refBv=Db.getReference().child("Bv");
-            DatabaseReference refUser=Db.getReference().child("User");
-            DatabaseReference refPre=Db.getReference().child("Preinscription");
-            DatabaseReference refIns=Db.getReference().child("Inscription");
 
-            refBv.addValueEventListener(new ValueEventListener() {
+            refBv.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    int count =0;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        progressBar.setVisibility(View.VISIBLE);
-                        Bv bvi=postSnapshot.getValue(Bv.class);
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot bvDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    int count=0;
+                    for (QueryDocumentSnapshot postSnapshot : bvDocs) {
+                        Bv bvi=map_bv(postSnapshot);
                         if(bvi.getBv_region().equals(regIntent)){
                             count+=1;
                         }
@@ -470,18 +437,14 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
-            refUser.addValueEventListener(new ValueEventListener() {
+            refUser.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    int count =0;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        progressBar.setVisibility(View.VISIBLE);
-                        User bvi=postSnapshot.getValue(User.class);
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    int count=0;
+                    for (QueryDocumentSnapshot postSnapshot : userDocs) {
+                        User bvi=map_user(postSnapshot);
                         bureau.clear();
                         if(bvi.getRegion().equals(regIntent) & !bvi.getType().equals("Citoyen")) {
                             count+=1;
@@ -495,25 +458,21 @@ public class Activity_bv extends AppCompatActivity {
                     viewHolderMil.notifyDataSetChanged();
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
             final int[] act24h = {0};
             final int[] act30j = {0};
             final int[] act24ih = {0};
             final int[] act30ij = {0};
-            refPre.addValueEventListener(new ValueEventListener() {
+            refPre.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot preDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     int count =0;
                     act30j[0]=0;
                     act24h[0]=0;
                     long actual=System.currentTimeMillis()/1000;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    for (QueryDocumentSnapshot postSnapshot : preDocs) {
                         progressBar.setVisibility(View.VISIBLE);
-                        Preinscription bvi=postSnapshot.getValue(Preinscription.class);
+                        Preinscription bvi=map_pre(postSnapshot);
                         if(bvi.getRegion().equals(regIntent) ){
                             count+=1;
                             if (actual-bvi.getCreation_date()<3600*24){
@@ -530,21 +489,17 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
-            refIns.addValueEventListener(new ValueEventListener() {
+            refIns.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     int count =0;
                     act30ij[0]=0;
                     act24ih[0]=0;
                     long actual=System.currentTimeMillis()/1000;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    for (QueryDocumentSnapshot postSnapshot : insDocs) {
                         progressBar.setVisibility(View.VISIBLE);
-                        Inscription bvi=postSnapshot.getValue(Inscription.class);
+                        Inscription bvi=map_ins(postSnapshot);
                         if(bvi.getRegion().equals(comIntent) ){
                             count+=1;
                             if (actual-bvi.getCreation_date()<3600*24){
@@ -559,10 +514,6 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
 
             activite_24h.setText("Activite des 24h  : "+ act24h[0]+act24ih[0]);
@@ -594,18 +545,14 @@ public class Activity_bv extends AppCompatActivity {
             container.setVisibility(View.GONE);
             container_commune.setVisibility(View.VISIBLE);
             commune_name.setText(paysIntent);
-            DatabaseReference refBv=Db.getReference().child("Bv");
-            DatabaseReference refUser=Db.getReference().child("User");
-            DatabaseReference refPre=Db.getReference().child("Preinscription");
-            DatabaseReference refIns=Db.getReference().child("Inscription");
 
-            refBv.addValueEventListener(new ValueEventListener() {
+            refBv.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    int count =0;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        progressBar.setVisibility(View.VISIBLE);
-                        Bv bvi=postSnapshot.getValue(Bv.class);
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot bvDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    int count=0;
+                    for (QueryDocumentSnapshot postSnapshot : bvDocs) {
+                        Bv bvi=map_bv(postSnapshot);
                         if(bvi.getBv_pays().equals(paysIntent)){
                             count+=1;
                         }
@@ -614,18 +561,14 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
-            refUser.addValueEventListener(new ValueEventListener() {
+            refUser.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    int count =0;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        progressBar.setVisibility(View.VISIBLE);
-                        User bvi=postSnapshot.getValue(User.class);
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    int count=0;
+                    for (QueryDocumentSnapshot postSnapshot : userDocs) {
+                        User bvi=map_user(postSnapshot);
                         bureau.clear();
                         if(bvi.getPays().equals(paysIntent) & !bvi.getType().equals("Citoyen")) {
                             count+=1;
@@ -639,25 +582,21 @@ public class Activity_bv extends AppCompatActivity {
                     viewHolderMil.notifyDataSetChanged();
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
             final int[] act24h = {0};
             final int[] act30j = {0};
             final int[] act24ih = {0};
             final int[] act30ij = {0};
-            refPre.addValueEventListener(new ValueEventListener() {
+            refPre.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot preDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     int count =0;
                     act30j[0]=0;
                     act24h[0]=0;
                     long actual=System.currentTimeMillis()/1000;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    for (QueryDocumentSnapshot postSnapshot : preDocs) {
                         progressBar.setVisibility(View.VISIBLE);
-                        Preinscription bvi=postSnapshot.getValue(Preinscription.class);
+                        Preinscription bvi=map_pre(postSnapshot);
                         if(bvi.getPays().equals(paysIntent) ){
                             count+=1;
                             if (actual-bvi.getCreation_date()<3600*24){
@@ -674,21 +613,17 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
-            refIns.addValueEventListener(new ValueEventListener() {
+            refIns.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                     int count =0;
                     act30ij[0]=0;
                     act24ih[0]=0;
                     long actual=System.currentTimeMillis()/1000;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    for (QueryDocumentSnapshot postSnapshot : insDocs) {
                         progressBar.setVisibility(View.VISIBLE);
-                        Inscription bvi=postSnapshot.getValue(Inscription.class);
+                        Inscription bvi=map_ins(postSnapshot);
                         if(bvi.getPays().equals(paysIntent) ){
                             count+=1;
                             if (actual-bvi.getCreation_date()<3600*24){
@@ -703,10 +638,6 @@ public class Activity_bv extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
 
             activite_24h.setText("Activite des 24h  : "+ act24h[0]+act24ih[0]);
@@ -731,6 +662,12 @@ public class Activity_bv extends AppCompatActivity {
 
         }
 
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
     }
 
@@ -801,5 +738,121 @@ public class Activity_bv extends AppCompatActivity {
                 return true;
         }
         return false;
+    }
+    public Bv map_bv(QueryDocumentSnapshot doc){
+        Bv bv1=new Bv();
+        bv1.bv_attente = Math.toIntExact(doc.getLong("bv_attente"));
+        bv1.bv_recolte = Math.toIntExact(doc.getLong("bv_recolte"));
+        bv1.bv_commune = doc.getString("bv_commune");
+        bv1.bv_dep = doc.getString("bv_dep");
+        bv1.bv_name = doc.getString("bv_name");
+        bv1.bv_pays = doc.getString("bv_pays");
+        bv1.bv_region = doc.getString("bv_region");
+        bv1.bv_vol1_name = doc.getString("bv_vol1_name");
+        bv1.bv_vol2_name = doc.getString("bv_vol2_name");
+        bv1.bv_vol3_name = doc.getString("bv_vol3_name");
+        bv1.bv_vol4_name = doc.getString("bv_vol4_name");
+        bv1.bv_vol1_tel = doc.getString("bv_vol1_tel");
+        bv1.bv_vol2_tel = doc.getString("bv_vol2_tel");
+        bv1.bv_vol3_tel = doc.getString("bv_vol3_tel");
+        bv1.bv_vol4_tel = doc.getString("bv_vol4_tel");
+        return bv1;
+    }
+    public User map_user(QueryDocumentSnapshot docU){
+        User user1=new User();
+        user1.id=docU.getString("id");
+        user1.cni=docU.getString("cni");
+        user1.activite= Math.toIntExact(docU.getLong("activite"));
+        user1.code=docU.getString("code");
+        user1.commune=docU.getString("commune");
+        user1.comite_base=docU.getString("comite_base");
+        user1.creation_date=docU.getLong("creation_date");
+        user1.date_naissance=docU.getString("date_naissance");
+        user1.departement=docU.getString("departement");
+        user1.departement_org=docU.getString("departement_org");
+        user1.email=docU.getString("email");
+        user1.matricule_parti=docU.getString("matricule_parti");
+        user1.nom=docU.getString("nom");
+        user1.parrain=docU.getString("parrain");
+        user1.pays=docU.getString("pays");
+        user1.parti=docU.getString("parti");
+        user1.password=docU.getString("password");
+        user1.region=docU.getString("region");
+        user1.prenom=docU.getString("prenom");
+        user1.sexe=docU.getString("sexe");
+        user1.sympatisant=docU.getString("sympatisant");
+        user1.type=docU.getString("type");
+        user1.sous_comite_arr=docU.getString("sous_comite_arr");
+        user1.telephone=docU.getString("telephone");
+        return user1;
+    }
+    public Inscription map_ins(QueryDocumentSnapshot insD){
+        Inscription ins = new Inscription();
+        ins.id = insD.getString("id");
+        ins.nom = insD.getString("nom");
+        ins.prenom = insD.getString("prenom");
+        ins.sexe = insD.getString("sexe");
+        ins.date_naissance = insD.getString("date_naissance");
+        ins.telephone = insD.getString("telephone");
+        ins.email = insD.getString("email");
+        ins.region = insD.getString("region");
+        ins.pays = insD.getString("pays");
+        ins.departement = insD.getString("departement");
+        ins.commune = insD.getString("commune");
+        ins.bv = insD.getString("bv");
+        ins.departement_org = insD.getString("departement_org");
+        ins.cni = insD.getString("cni");
+        ins.numero_ce = insD.getString("numero_ce");
+        ins.parrain = insD.getString("parrain");
+        ins.sympatisant = insD.getString("sympatisant");
+        ins.creation_date = insD.getLong("creation_date");
+        return ins;
+    }
+    public Preinscription map_pre(QueryDocumentSnapshot preD){
+        Preinscription pre = new Preinscription();
+        pre.id = preD.getString("id");
+        pre.nom = preD.getString("nom");
+        pre.prenom = preD.getString("prenom");
+        pre.sexe = preD.getString("sexe");
+        pre.date_naissance = preD.getString("date_naissance");
+        pre.telephone = preD.getString("telephone");
+        pre.email = preD.getString("email");
+        pre.region = preD.getString("region");
+        pre.pays = preD.getString("pays");
+        pre.parti = preD.getString("parti");
+        pre.matricule_parti = preD.getString("matricule_parti");
+        pre.departement = preD.getString("departement");
+        pre.commune = preD.getString("commune");
+        pre.departement_org = preD.getString("departement_org");
+        pre.cni = preD.getString("cni");
+        pre.parrain = preD.getString("parrain");
+        pre.sympatisant = preD.getString("sympatisant");
+        pre.creation_date = preD.getLong("creation_date");
+        return pre;
+
+    }
+    public Discussion map_disc(QueryDocumentSnapshot discD){
+        Discussion dis=new Discussion();
+        dis.id=discD.getString("id");
+        dis.title=discD.getString("title");
+        dis.type=discD.getString("type");
+        dis.initiateur=discD.getString("initiateur");
+        dis.interlocuteur=discD.getString("interlocuteur");
+        dis.last_date=discD.getLong("last_date");
+        dis.last_message=discD.getString("last_message");
+        dis.last_writer=discD.getString("last_writer");
+
+        return dis;
+    }
+    public Message map_mes(QueryDocumentSnapshot mesD){
+        Message mes=new Message();
+        mes.emetteur=mesD.getString("emetteur");
+        mes.recepteur=mesD.getString("recepteur");
+        mes.contenu=mesD.getString("contenu");
+        mes.disc_id=mesD.getString("disc_id");
+        mes.etat=mesD.getString("etat");
+        mes.id=mesD.getId();
+        mes.date_envoi=mesD.getLong("date_envoi");
+        return mes;
     }
 }

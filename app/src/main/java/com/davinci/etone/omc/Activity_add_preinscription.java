@@ -1,7 +1,8 @@
 package com.davinci.etone.omc;
 
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +29,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -63,6 +69,14 @@ public class Activity_add_preinscription extends AppCompatActivity {
     ArrayList<String> payslist=new ArrayList<>();
     ArrayList<String> partis=new ArrayList<>();
     ArrayList<String> indicatifs=new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    CollectionReference refPre = db.collection("Preinscription");
+    CollectionReference refIns = db.collection("Inscription");
+    CollectionReference refUser = db.collection("User");
+    CollectionReference refDisc = db.collection("Discussion");
+    CollectionReference refMes = db.collection("Message");
+    CollectionReference refBv = db.collection("Bv");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -315,40 +329,32 @@ public class Activity_add_preinscription extends AppCompatActivity {
                     inscription.setDepartement_org(departement_org.getText().toString());
                     inscription.setCommune(commune.getText().toString());
                     but_create.setClickable(false);
-                    DatabaseReference refPre = Db.getReference().child("Preinscription");
-                    DatabaseReference refUser = Db.getReference().child("User");
                     if (!parrain.getText().toString().isEmpty()) {
-                        refUser.addListenerForSingleValueEvent(new ValueEventListener() {
+                        refUser.whereEqualTo("code", parrain.getText().toString().trim()).limit(1).addSnapshotListener(new EventListener<QuerySnapshot>() {
                             @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            public void onEvent(@javax.annotation.Nullable QuerySnapshot userDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                                 boolean test1 = false;
-                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    User user = snapshot.getValue(User.class);
-                                    if (user.getId().toUpperCase().equals(parrain.getText().toString().trim()
-                                            .toUpperCase())) {
-                                        test1 = true;
-                                        break;
-                                    }
+                                for (QueryDocumentSnapshot userD : userDocs) {
+                                    User user = map_user(userD);
+                                    test1 = true;
+
                                 }
                                 if (test1) {
                                     inscription.setParrain(parrain.getText().toString().trim());
-                                    refPre.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    refPre.whereEqualTo("cni",inscription.getCni()).limit(1).addSnapshotListener(new EventListener<QuerySnapshot>() {
                                         @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                                             boolean test = true;
-                                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                                Preinscription pre = snapshot.getValue(Preinscription.class);
-                                                if (pre.getCni().equals(inscription.getCni())) {
-                                                    test = false;
-                                                    break;
-                                                }
+                                            for (QueryDocumentSnapshot insD : insDocs) {
+                                                Preinscription pre = map_pre(insD);
+                                                test = false;
                                             }
                                             if (test) {
-                                                String key = refPre.push().getKey();
+                                                String key = refPre.document().getId();
                                                 inscription.setId(key);
                                                 Calendar calendar=Calendar.getInstance();
                                                 inscription.setCreation_date(calendar.getTimeInMillis()/1000);
-                                                refPre.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                refPre.document(key).set(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         Toast.makeText(Activity_add_preinscription.this,
@@ -367,10 +373,6 @@ public class Activity_add_preinscription extends AppCompatActivity {
                                             }
                                         }
 
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
                                     });
 
                                 } else {
@@ -381,30 +383,23 @@ public class Activity_add_preinscription extends AppCompatActivity {
                                 }
                             }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
                         });
                     }
                     else {
-                        refPre.addListenerForSingleValueEvent(new ValueEventListener() {
+                        refPre.whereEqualTo("cni",inscription.getCni()).limit(1).addSnapshotListener(new EventListener<QuerySnapshot>() {
                             @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            public void onEvent(@javax.annotation.Nullable QuerySnapshot insDocs, @javax.annotation.Nullable FirebaseFirestoreException e) {
                                 boolean test = true;
-                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    Preinscription pre = snapshot.getValue(Preinscription.class);
-                                    if (pre.getCni().equals(inscription.getCni())) {
-                                        test = false;
-                                        break;
-                                    }
+                                for (QueryDocumentSnapshot insD : insDocs) {
+                                    Preinscription pre = map_pre(insD);
+                                    test = false;
                                 }
                                 if (test) {
-                                    String key = refPre.push().getKey();
+                                    String key = refPre.document().getId();
                                     inscription.setId(key);
                                     Calendar calendar=Calendar.getInstance();
                                     inscription.setCreation_date(calendar.getTimeInMillis()/1000);
-                                    refPre.child(key).setValue(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    refPre.document(key).set(inscription).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             Toast.makeText(Activity_add_preinscription.this,
@@ -423,10 +418,6 @@ public class Activity_add_preinscription extends AppCompatActivity {
                                 }
                             }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
                         });
 
                     }
@@ -460,7 +451,7 @@ public class Activity_add_preinscription extends AppCompatActivity {
     }
     private long getTimestamp(String str_date){
         long timestamp = 0;
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         Date date = null;
         try {
             date = (Date)formatter.parse(str_date);
@@ -517,5 +508,121 @@ public class Activity_add_preinscription extends AppCompatActivity {
                 return true;
         }
         return false;
+    }
+    public Bv map_bv(QueryDocumentSnapshot doc){
+        Bv bv1=new Bv();
+        bv1.bv_attente = Math.toIntExact(doc.getLong("bv_attente"));
+        bv1.bv_recolte = Math.toIntExact(doc.getLong("bv_recolte"));
+        bv1.bv_commune = doc.getString("bv_commune");
+        bv1.bv_dep = doc.getString("bv_dep");
+        bv1.bv_name = doc.getString("bv_name");
+        bv1.bv_pays = doc.getString("bv_pays");
+        bv1.bv_region = doc.getString("bv_region");
+        bv1.bv_vol1_name = doc.getString("bv_vol1_name");
+        bv1.bv_vol2_name = doc.getString("bv_vol2_name");
+        bv1.bv_vol3_name = doc.getString("bv_vol3_name");
+        bv1.bv_vol4_name = doc.getString("bv_vol4_name");
+        bv1.bv_vol1_tel = doc.getString("bv_vol1_tel");
+        bv1.bv_vol2_tel = doc.getString("bv_vol2_tel");
+        bv1.bv_vol3_tel = doc.getString("bv_vol3_tel");
+        bv1.bv_vol4_tel = doc.getString("bv_vol4_tel");
+        return bv1;
+    }
+    public User map_user(QueryDocumentSnapshot docU){
+        User user1=new User();
+        user1.id=docU.getString("id");
+        user1.cni=docU.getString("cni");
+        user1.activite= Math.toIntExact(docU.getLong("activite"));
+        user1.code=docU.getString("code");
+        user1.commune=docU.getString("commune");
+        user1.comite_base=docU.getString("comite_base");
+        user1.creation_date=docU.getLong("creation_date");
+        user1.date_naissance=docU.getString("date_naissance");
+        user1.departement=docU.getString("departement");
+        user1.departement_org=docU.getString("departement_org");
+        user1.email=docU.getString("email");
+        user1.matricule_parti=docU.getString("matricule_parti");
+        user1.nom=docU.getString("nom");
+        user1.parrain=docU.getString("parrain");
+        user1.pays=docU.getString("pays");
+        user1.parti=docU.getString("parti");
+        user1.password=docU.getString("password");
+        user1.region=docU.getString("region");
+        user1.prenom=docU.getString("prenom");
+        user1.sexe=docU.getString("sexe");
+        user1.sympatisant=docU.getString("sympatisant");
+        user1.type=docU.getString("type");
+        user1.sous_comite_arr=docU.getString("sous_comite_arr");
+        user1.telephone=docU.getString("telephone");
+        return user1;
+    }
+    public Inscription map_ins(QueryDocumentSnapshot insD){
+        Inscription ins = new Inscription();
+        ins.id = insD.getString("id");
+        ins.nom = insD.getString("nom");
+        ins.prenom = insD.getString("prenom");
+        ins.sexe = insD.getString("sexe");
+        ins.date_naissance = insD.getString("date_naissance");
+        ins.telephone = insD.getString("telephone");
+        ins.email = insD.getString("email");
+        ins.region = insD.getString("region");
+        ins.pays = insD.getString("pays");
+        ins.departement = insD.getString("departement");
+        ins.commune = insD.getString("commune");
+        ins.bv = insD.getString("bv");
+        ins.departement_org = insD.getString("departement_org");
+        ins.cni = insD.getString("cni");
+        ins.numero_ce = insD.getString("numero_ce");
+        ins.parrain = insD.getString("parrain");
+        ins.sympatisant = insD.getString("sympatisant");
+        ins.creation_date = insD.getLong("creation_date");
+        return ins;
+    }
+    public Preinscription map_pre(QueryDocumentSnapshot preD){
+        Preinscription pre = new Preinscription();
+        pre.id = preD.getString("id");
+        pre.nom = preD.getString("nom");
+        pre.prenom = preD.getString("prenom");
+        pre.sexe = preD.getString("sexe");
+        pre.date_naissance = preD.getString("date_naissance");
+        pre.telephone = preD.getString("telephone");
+        pre.email = preD.getString("email");
+        pre.region = preD.getString("region");
+        pre.pays = preD.getString("pays");
+        pre.parti = preD.getString("parti");
+        pre.matricule_parti = preD.getString("matricule_parti");
+        pre.departement = preD.getString("departement");
+        pre.commune = preD.getString("commune");
+        pre.departement_org = preD.getString("departement_org");
+        pre.cni = preD.getString("cni");
+        pre.parrain = preD.getString("parrain");
+        pre.sympatisant = preD.getString("sympatisant");
+        pre.creation_date = preD.getLong("creation_date");
+        return pre;
+
+    }
+    public Discussion map_disc(QueryDocumentSnapshot discD){
+        Discussion dis=new Discussion();
+        dis.id=discD.getString("id");
+        dis.title=discD.getString("title");
+        dis.type=discD.getString("type");
+        dis.initiateur=discD.getString("initiateur");
+        dis.interlocuteur=discD.getString("interlocuteur");
+        dis.last_date=discD.getLong("last_date");
+        dis.last_message=discD.getString("last_message");
+        dis.last_writer=discD.getString("last_writer");
+
+        return dis;
+    }
+    public Message map_mes(QueryDocumentSnapshot mesD){
+        Message mes=new Message();
+        mes.emetteur=mesD.getString("emetteur");
+        mes.recepteur=mesD.getString("recepteur");
+        mes.contenu=mesD.getString("contenu");
+        mes.disc_id=mesD.getString("disc_id");
+        mes.etat=mesD.getString("etat");
+        mes.id=mesD.getId();
+        mes.date_envoi=mesD.getLong("date_envoi");
+        return mes;
     }
 }
